@@ -280,40 +280,6 @@
     }
     .ctrl-btn.share-btn:active { background: var(--gold-lt); transform: scale(0.9); }
 
-    /* ── SESSIONS ───────────────────────────────────────── */
-    .sessions-wrap {
-      width: 100%; max-width: 480px;
-      padding: 2px 24px 20px;
-      overflow-y: auto;
-      max-height: 155px;
-      scrollbar-width: thin;
-      scrollbar-color: var(--gold-dim) transparent;
-    }
-
-    .sessions-label {
-      font-size: 0.65rem;
-      letter-spacing: 2.5px;
-      text-transform: uppercase;
-      color: var(--text-dim);
-      margin-bottom: 8px;
-    }
-
-    .session-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 9px 12px;
-      background: rgba(255,255,255,0.03);
-      border-radius: 10px;
-      margin-bottom: 5px;
-      font-size: 0.81rem;
-    }
-
-    .s-name  { color: var(--text); font-weight: 500; margin-bottom: 2px; }
-    .s-when  { color: var(--text-dim); font-size: 0.7rem; }
-    .s-count { color: var(--gold); font-weight: 600; text-align: right; }
-    .s-tick  { color: var(--done); font-size: 0.7rem; text-align: right; }
-
     /* ── COMPLETE OVERLAY ───────────────────────────────── */
     .overlay {
       position: fixed; inset: 0;
@@ -571,9 +537,6 @@
     </button>
   </div>
 
-  <!-- SESSION HISTORY -->
-  <div class="sessions-wrap" id="sessions-wrap"></div>
-
   <!-- ── COMPLETE OVERLAY ──────────────────────────────────────────────────── -->
   <div class="overlay" id="complete-overlay">
     <div class="ov-icon">🤲</div>
@@ -676,9 +639,7 @@
     let dhikrIdx     = 0;
     let customTarget = null;
     let completed    = false;
-    let saved        = false;
     let editMode     = false;
-    let sessions     = JSON.parse(localStorage.getItem('tasbih_v2') || '[]');
 
     // editing state for dhikr modal
     let dhikrModalMode = 'add'; // 'add' | 'edit'
@@ -694,7 +655,6 @@
     const $arabicTxt = document.getElementById('arabic-text');
     const $targetTxt = document.getElementById('target-text');
     const $tapBtn    = document.getElementById('tap-btn');
-    const $sessions  = document.getElementById('sessions-wrap');
     const $overlay   = document.getElementById('complete-overlay');
     const $drawerBg  = document.getElementById('drawer-bg');
     const $sharePrev = document.getElementById('share-preview');
@@ -772,7 +732,7 @@
     function selectDhikr(i) {
       dhikrIdx     = i;
       customTarget = null;
-      doReset(false);
+      doReset();
       buildChips();
     }
 
@@ -840,12 +800,12 @@
         dhikrList.push({ name, arabic, target });
         dhikrIdx = dhikrList.length - 1;
         customTarget = null;
-        doReset(false);
+        doReset();
       } else {
         dhikrList[dhikrEditIdx] = { name, arabic, target };
         if (dhikrEditIdx === dhikrIdx) {
           // refresh counter display if currently active
-          doReset(false);
+          doReset();
         }
       }
 
@@ -876,7 +836,7 @@
       customTarget = null;
       saveDhikrList();
       buildChips();
-      doReset(false);
+      doReset();
       showToast(`"${name}" deleted`);
     }
 
@@ -894,23 +854,6 @@
       } else {
         $targetTxt.innerHTML = `<span class="done-label">✓ ${count} completed</span>`;
       }
-    }
-
-    function renderSessions() {
-      if (!sessions.length) { $sessions.innerHTML = ''; return; }
-      $sessions.innerHTML =
-        `<div class="sessions-label">Recent Sessions</div>` +
-        sessions.map(s => `
-          <div class="session-row">
-            <div>
-              <div class="s-name">${s.dhikr}</div>
-              <div class="s-when">${s.day} · ${s.time}</div>
-            </div>
-            <div>
-              <div class="s-count">${s.count}/${s.target}</div>
-              ${s.done ? '<div class="s-tick">✓ Complete</div>' : ''}
-            </div>
-          </div>`).join('');
     }
 
     // ── TAP ──────────────────────────────────────────────────────────────────
@@ -951,7 +894,6 @@
       if (count <= 0) return;
       count--;
       completed = false;
-      saved     = false;
       $overlay.classList.remove('show');
       $ringFill.classList.remove('done-pulse');
       haptic(14);
@@ -961,34 +903,16 @@
     // ── RESET ────────────────────────────────────────────────────────────────
     document.getElementById('reset-btn').addEventListener('click', () => {
       if (count === 0) return;
-      doReset(true);
+      doReset();
     });
 
-    function doReset(saveIt = true) {
-      if (saveIt && count > 0 && !saved) saveSession();
+    function doReset() {
       count     = 0;
       completed = false;
-      saved     = false;
       $overlay.classList.remove('show');
       $ringFill.classList.remove('done-pulse');
       haptic(18);
       render();
-      renderSessions();
-    }
-
-    // ── SAVE SESSION ─────────────────────────────────────────────────────────
-    function saveSession() {
-      saved = true;
-      sessions.unshift({
-        dhikr:  curDhikr().name,
-        count,
-        target: getTarget(),
-        done:   count >= getTarget(),
-        day:    new Date().toLocaleDateString([], { month: 'short', day: 'numeric' }),
-        time:   new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      });
-      sessions = sessions.slice(0, 10);
-      localStorage.setItem('tasbih_v2', JSON.stringify(sessions));
     }
 
     // ── COMPLETE ─────────────────────────────────────────────────────────────
@@ -1001,15 +925,13 @@
       document.getElementById('ov-msg').textContent =
         `You completed ${getTarget()} ${d.name}. May Allah accept your dhikr and reward you abundantly. 🤍`;
 
-      if (!saved) saveSession();
-      renderSessions();
       $overlay.classList.add('show');
     }
 
     document.getElementById('ov-continue-btn').addEventListener('click', () =>
       $overlay.classList.remove('show'));
 
-    document.getElementById('ov-new-btn').addEventListener('click', () => doReset(false));
+    document.getElementById('ov-new-btn').addEventListener('click', () => doReset());
 
     document.getElementById('ov-share-btn').addEventListener('click', openShareDrawer);
 
@@ -1086,7 +1008,7 @@
       }
       customTarget = val;
       buildChips();
-      doReset(false);
+      doReset();
       $settModal.classList.remove('show');
       showToast(`Target set to ${val} 🎯`);
     });
@@ -1094,7 +1016,6 @@
     // ── BOOT ─────────────────────────────────────────────────────────────────
     buildChips();
     render();
-    renderSessions();
   </script>
 </body>
 </html>
