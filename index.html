@@ -435,6 +435,59 @@
     }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+    /* ── INSTALL HINT (iOS Add-to-Home-Screen) ──────────── */
+    .install-hint {
+      position: fixed;
+      left: 12px; right: 12px;
+      bottom: 14px;
+      max-width: 456px;
+      margin: 0 auto;
+      background: var(--surface);
+      border: 1px solid var(--gold-dim);
+      border-radius: 16px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+      z-index: 480;
+      transform: translateY(140%);
+      transition: transform 0.35s cubic-bezier(.4,0,.2,1);
+    }
+    .install-hint.show { transform: translateY(0); }
+
+    .install-icon {
+      width: 42px; height: 42px;
+      border-radius: 11px;
+      flex-shrink: 0;
+      background-size: cover;
+      box-shadow: inset 0 0 0 1px rgba(201,162,39,0.3);
+    }
+
+    .install-body { flex: 1; min-width: 0; }
+    .install-title { font-size: 0.86rem; font-weight: 700; color: var(--gold); margin-bottom: 2px; }
+    .install-text  { font-size: 0.74rem; color: var(--text-dim); line-height: 1.45; }
+    .install-text .ios-share {
+      display: inline-flex;
+      vertical-align: -3px;
+      margin: 0 1px;
+      color: var(--gold-lt);
+    }
+
+    .install-close {
+      flex-shrink: 0;
+      align-self: flex-start;
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(255,255,255,0.06);
+      color: var(--text-dim);
+      font-size: 1rem;
+      line-height: 1;
+      cursor: pointer;
+    }
+    .install-close:active { background: rgba(255,255,255,0.14); }
+
     /* ── SHARE DRAWER ───────────────────────────────────── */
     .drawer-bg {
       position: fixed; inset: 0;
@@ -646,6 +699,23 @@
         </button>
       </div>
     </div>
+  </div>
+
+  <!-- ── INSTALL HINT (shown only to iOS Safari, non-installed) ─────────────── -->
+  <div class="install-hint" id="install-hint">
+    <div class="install-icon" style="background-image:url('icon-180.png')"></div>
+    <div class="install-body">
+      <div class="install-title">Install Tasbih</div>
+      <div class="install-text">
+        Tap
+        <svg class="ios-share" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 16V4"/><path d="M8 8l4-4 4 4"/>
+          <path d="M4 14v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/>
+        </svg>
+        then <b>Add to Home Screen</b> to use it like an app.
+      </div>
+    </div>
+    <button class="install-close" id="install-close" aria-label="Dismiss">&times;</button>
   </div>
 
   <!-- TOAST -->
@@ -1044,6 +1114,30 @@
       $settModal.classList.remove('show');
       showToast(`Target set to ${val} 🎯`);
     });
+
+    // ── INSTALL HINT (iOS "Add to Home Screen") ──────────────────────────────
+    (function initInstallHint() {
+      const ua          = navigator.userAgent || '';
+      const isIOS       = /iPad|iPhone|iPod/.test(ua) ||
+                          (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      // already installed / running standalone?
+      const standalone  = window.navigator.standalone === true ||
+                          window.matchMedia('(display-mode: standalone)').matches;
+      const dismissed   = localStorage.getItem('tasbih_install_hint') === 'dismissed';
+
+      if (!isIOS || standalone || dismissed) return;
+
+      const $hint  = document.getElementById('install-hint');
+      const $close = document.getElementById('install-close');
+
+      // show after a short delay so it doesn't fight the first render
+      setTimeout(() => $hint.classList.add('show'), 1600);
+
+      $close.addEventListener('click', () => {
+        $hint.classList.remove('show');
+        localStorage.setItem('tasbih_install_hint', 'dismissed');
+      });
+    })();
 
     // ── BOOT ─────────────────────────────────────────────────────────────────
     buildChips();
