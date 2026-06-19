@@ -22,12 +22,10 @@
       --text-dim:  rgba(245, 240, 224, 0.48);
       --green-mid: #2d6a4f;
       --done:      #52b788;
+      --danger:    #ff6b6b;
     }
 
-    html, body {
-      height: 100%;
-      overflow: hidden;
-    }
+    html, body { height: 100%; overflow: hidden; }
 
     body {
       background: var(--bg);
@@ -50,10 +48,7 @@
       align-items: flex-start;
     }
 
-    .header-brand {
-      display: flex;
-      flex-direction: column;
-    }
+    .header-brand { display: flex; flex-direction: column; }
 
     .header-title {
       font-size: 1.35rem;
@@ -69,6 +64,8 @@
       text-transform: uppercase;
       margin-top: 2px;
     }
+
+    .header-actions { display: flex; gap: 8px; align-items: center; }
 
     .icon-btn {
       width: 40px;
@@ -86,6 +83,10 @@
       flex-shrink: 0;
     }
     .icon-btn:active { background: rgba(201,162,39,0.15); }
+    .icon-btn.active-mode {
+      background: rgba(201,162,39,0.18);
+      border-color: var(--gold);
+    }
 
     /* ── DHIKR CHIPS ────────────────────────────────────── */
     .chip-row {
@@ -96,6 +97,7 @@
       gap: 8px;
       overflow-x: auto;
       scrollbar-width: none;
+      align-items: center;
     }
     .chip-row::-webkit-scrollbar { display: none; }
 
@@ -118,6 +120,45 @@
       font-weight: 600;
     }
     .chip:active { opacity: 0.75; }
+
+    /* edit-mode chip variants */
+    .chip.chip-edit-name {
+      border-radius: 20px 0 0 20px;
+      border-right: none;
+    }
+    .chip-del {
+      flex-shrink: 0;
+      height: 32px;
+      padding: 0 10px;
+      border-radius: 0 20px 20px 0;
+      border: 1px solid rgba(255, 107, 107, 0.35);
+      border-left: none;
+      background: rgba(255, 107, 107, 0.08);
+      color: var(--danger);
+      cursor: pointer;
+      font-size: 1rem;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      transition: all 0.15s;
+    }
+    .chip-del:active { background: rgba(255, 107, 107, 0.22); }
+
+    /* when chip-edit-name is active, keep gold ring on left, red on right */
+    .chip.chip-edit-name.active { border-right: none; }
+
+    .chip.chip-add {
+      background: rgba(201,162,39,0.07);
+      border-style: dashed;
+      color: var(--gold);
+    }
+    .chip.chip-done {
+      background: var(--done);
+      border-color: var(--done);
+      color: #0a2018;
+      font-weight: 600;
+    }
+    .chip.chip-done:active { opacity: 0.8; }
 
     /* ── COUNTER AREA ───────────────────────────────────── */
     .counter-area {
@@ -142,24 +183,11 @@
       min-height: 2.2rem;
     }
 
-    /* Progress ring */
-    .ring-wrap {
-      position: relative;
-      width: 272px;
-      height: 272px;
-    }
+    .ring-wrap { position: relative; width: 272px; height: 272px; }
 
-    .ring-svg {
-      width: 100%;
-      height: 100%;
-      transform: rotate(-90deg);
-    }
+    .ring-svg { width: 100%; height: 100%; transform: rotate(-90deg); }
 
-    .ring-track {
-      fill: none;
-      stroke: rgba(201,162,39,0.11);
-      stroke-width: 7;
-    }
+    .ring-track { fill: none; stroke: rgba(201,162,39,0.11); stroke-width: 7; }
 
     .ring-fill {
       fill: none;
@@ -169,16 +197,13 @@
       transition: stroke-dashoffset 0.22s cubic-bezier(.4,0,.2,1);
     }
 
-    .ring-fill.done-pulse {
-      animation: pulse 1.6s ease-in-out infinite;
-    }
+    .ring-fill.done-pulse { animation: pulse 1.6s ease-in-out infinite; }
 
     @keyframes pulse {
       0%, 100% { opacity: 0.7; }
       50%       { opacity: 1; }
     }
 
-    /* Tap button */
     .tap-btn {
       position: absolute;
       inset: 22px;
@@ -203,9 +228,7 @@
 
     .tap-btn.press {
       transform: scale(0.92);
-      box-shadow:
-        0 4px 22px rgba(0,0,0,0.55),
-        inset 0 0 0 1px rgba(201,162,39,0.22);
+      box-shadow: 0 4px 22px rgba(0,0,0,0.55), inset 0 0 0 1px rgba(201,162,39,0.22);
     }
 
     .count-num {
@@ -216,24 +239,11 @@
       font-variant-numeric: tabular-nums;
       transition: transform 0.08s ease;
     }
+    .count-num.bump { transform: scale(1.12); }
 
-    .count-num.bump {
-      transform: scale(1.12);
-    }
+    .tap-hint { font-size: 0.62rem; color: var(--text-dim); letter-spacing: 3px; text-transform: uppercase; }
 
-    .tap-hint {
-      font-size: 0.62rem;
-      color: var(--text-dim);
-      letter-spacing: 3px;
-      text-transform: uppercase;
-    }
-
-    .target-text {
-      font-size: 0.82rem;
-      color: var(--text-dim);
-      min-height: 1.1rem;
-    }
-
+    .target-text { font-size: 0.82rem; color: var(--text-dim); min-height: 1.1rem; }
     .target-text .done-label { color: var(--done); }
 
     /* ── CONTROLS ───────────────────────────────────────── */
@@ -248,26 +258,21 @@
     }
 
     .ctrl-btn {
-      width: 54px;
-      height: 54px;
+      width: 54px; height: 54px;
       border-radius: 50%;
       border: 1px solid var(--gold-dim);
       background: rgba(201,162,39,0.06);
       color: var(--gold);
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
       transition: all 0.15s;
       -webkit-tap-highlight-color: transparent;
     }
-
     .ctrl-btn svg { width: 21px; height: 21px; }
     .ctrl-btn:active { transform: scale(0.88); background: rgba(201,162,39,0.18); }
 
     .ctrl-btn.share-btn {
-      width: 66px;
-      height: 66px;
+      width: 66px; height: 66px;
       background: var(--gold);
       border-color: var(--gold);
       color: #162010;
@@ -277,8 +282,7 @@
 
     /* ── SESSIONS ───────────────────────────────────────── */
     .sessions-wrap {
-      width: 100%;
-      max-width: 480px;
+      width: 100%; max-width: 480px;
       padding: 2px 24px 20px;
       overflow-y: auto;
       max-height: 155px;
@@ -312,22 +316,16 @@
 
     /* ── COMPLETE OVERLAY ───────────────────────────────── */
     .overlay {
-      position: fixed;
-      inset: 0;
+      position: fixed; inset: 0;
       background: rgba(5, 18, 10, 0.9);
       backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 16px;
-      z-index: 300;
-      opacity: 0;
-      pointer-events: none;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 16px; z-index: 300;
+      opacity: 0; pointer-events: none;
       transition: opacity 0.3s;
-      padding: 30px;
-      text-align: center;
+      padding: 30px; text-align: center;
     }
     .overlay.show { opacity: 1; pointer-events: all; }
 
@@ -340,52 +338,38 @@
 
     .ov-title { font-size: 2rem; font-weight: 700; color: var(--gold); }
     .ov-arabic {
-      font-size: 1.4rem;
-      color: var(--gold-lt);
+      font-size: 1.4rem; color: var(--gold-lt);
       direction: rtl;
       font-family: 'Segoe UI', 'Arial Unicode MS', sans-serif;
     }
     .ov-msg { font-size: 0.92rem; color: var(--text-dim); line-height: 1.55; max-width: 300px; }
-
     .ov-btns { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 6px; }
 
     .btn-gold {
-      padding: 13px 26px;
-      border-radius: 28px;
-      background: var(--gold);
-      color: #162010;
-      font-weight: 700;
-      font-size: 0.92rem;
-      border: none;
-      cursor: pointer;
+      padding: 13px 26px; border-radius: 28px;
+      background: var(--gold); color: #162010;
+      font-weight: 700; font-size: 0.92rem;
+      border: none; cursor: pointer;
       transition: transform 0.1s;
     }
     .btn-gold:active { transform: scale(0.93); }
 
     .btn-outline {
-      padding: 13px 26px;
-      border-radius: 28px;
-      background: transparent;
-      color: var(--gold);
-      font-weight: 600;
-      font-size: 0.92rem;
+      padding: 13px 26px; border-radius: 28px;
+      background: transparent; color: var(--gold);
+      font-weight: 600; font-size: 0.92rem;
       border: 1px solid var(--gold-dim);
-      cursor: pointer;
-      transition: all 0.1s;
+      cursor: pointer; transition: all 0.1s;
     }
     .btn-outline:active { background: rgba(201,162,39,0.12); }
 
-    /* ── SETTINGS MODAL ─────────────────────────────────── */
+    /* ── MODALS ─────────────────────────────────────────── */
     .modal-bg {
-      position: fixed;
-      inset: 0;
+      position: fixed; inset: 0;
       background: rgba(0,0,0,0.78);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
       z-index: 400;
-      opacity: 0;
-      pointer-events: none;
+      opacity: 0; pointer-events: none;
       transition: opacity 0.22s;
       padding: 20px;
     }
@@ -395,8 +379,7 @@
       background: var(--surface);
       border-radius: 20px;
       padding: 26px 22px;
-      width: 100%;
-      max-width: 320px;
+      width: 100%; max-width: 320px;
       border: 1px solid var(--gold-dim);
     }
 
@@ -412,45 +395,54 @@
       color: var(--text);
       font-size: 1.05rem;
       outline: none;
-      margin-bottom: 14px;
+      margin-bottom: 10px;
     }
     .modal-input:focus { border-color: var(--gold); }
+    .modal-input::placeholder { color: rgba(245,240,224,0.25); }
+    .modal-input[dir="rtl"] { font-family: 'Segoe UI', 'Arial Unicode MS', 'Noto Sans Arabic', sans-serif; font-size: 1.1rem; }
 
-    .modal-btns { display: flex; gap: 8px; }
-    .modal-btns .btn-gold  { flex: 1; }
+    .modal-btns { display: flex; gap: 8px; margin-top: 4px; }
+    .modal-btns .btn-gold    { flex: 1; }
     .modal-btns .btn-outline { flex: 1; }
+
+    .btn-danger {
+      width: 100%;
+      padding: 10px;
+      border-radius: 10px;
+      background: transparent;
+      color: var(--danger);
+      border: 1px solid rgba(255, 107, 107, 0.3);
+      font-size: 0.84rem;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: all 0.15s;
+    }
+    .btn-danger:active { background: rgba(255, 107, 107, 0.12); }
 
     /* ── TOAST ──────────────────────────────────────────── */
     .toast {
       position: fixed;
-      bottom: 28px;
-      left: 50%;
+      bottom: 28px; left: 50%;
       transform: translateX(-50%) translateY(16px);
       background: rgba(201,162,39,0.92);
       color: #162010;
       padding: 9px 22px;
       border-radius: 22px;
-      font-size: 0.84rem;
-      font-weight: 600;
+      font-size: 0.84rem; font-weight: 600;
       opacity: 0;
       transition: opacity 0.25s, transform 0.25s;
       z-index: 500;
       white-space: nowrap;
       pointer-events: none;
     }
-    .toast.show {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
     /* ── SHARE DRAWER ───────────────────────────────────── */
     .drawer-bg {
-      position: fixed;
-      inset: 0;
+      position: fixed; inset: 0;
       background: rgba(0,0,0,0.72);
       z-index: 350;
-      opacity: 0;
-      pointer-events: none;
+      opacity: 0; pointer-events: none;
       transition: opacity 0.22s;
     }
     .drawer-bg.show { opacity: 1; pointer-events: all; }
@@ -465,14 +457,12 @@
       transform: translateY(100%);
       transition: transform 0.3s cubic-bezier(.4,0,.2,1);
       z-index: 360;
-      max-width: 480px;
-      margin: 0 auto;
+      max-width: 480px; margin: 0 auto;
     }
     .drawer-bg.show .drawer { transform: translateY(0); }
 
     .drawer-handle {
-      width: 38px;
-      height: 4px;
+      width: 38px; height: 4px;
       background: rgba(255,255,255,0.15);
       border-radius: 2px;
       margin: 0 auto 18px;
@@ -484,31 +474,24 @@
       background: rgba(255,255,255,0.04);
       border-radius: 12px;
       padding: 12px 14px;
-      font-size: 0.84rem;
-      color: var(--text-dim);
-      line-height: 1.55;
-      margin-bottom: 16px;
+      font-size: 0.84rem; color: var(--text-dim);
+      line-height: 1.55; margin-bottom: 16px;
       border: 1px solid rgba(255,255,255,0.06);
-      white-space: pre-wrap;
-      word-break: break-word;
+      white-space: pre-wrap; word-break: break-word;
     }
 
     .share-options { display: flex; gap: 12px; flex-wrap: wrap; }
 
     .share-opt {
-      flex: 1;
-      min-width: 110px;
+      flex: 1; min-width: 110px;
       padding: 11px 14px;
       border-radius: 12px;
       border: 1px solid var(--gold-dim);
       background: rgba(201,162,39,0.06);
       color: var(--gold);
-      font-size: 0.82rem;
-      font-weight: 600;
+      font-size: 0.82rem; font-weight: 600;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
       gap: 6px;
       transition: all 0.15s;
     }
@@ -525,7 +508,15 @@
       <div class="header-title">Tasbih</div>
       <div class="header-sub">Digital Counter</div>
     </div>
-    <button class="icon-btn" id="settings-btn" aria-label="Settings">⚙️</button>
+    <div class="header-actions">
+      <button class="icon-btn" id="edit-dhikr-btn" aria-label="Edit recitations" title="Edit recitations">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+        </svg>
+      </button>
+      <button class="icon-btn" id="settings-btn" aria-label="Custom target">⚙️</button>
+    </div>
   </div>
 
   <!-- DHIKR CHIPS -->
@@ -560,16 +551,13 @@
   <div class="controls">
     <button class="ctrl-btn" id="undo-btn" aria-label="Undo">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <polyline points="9 14 4 9 9 4"/>
-        <path d="M20 20v-7a4 4 0 0 0-4-4H4"/>
+        <polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/>
       </svg>
     </button>
 
     <button class="ctrl-btn share-btn" id="share-btn" aria-label="Share">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="18" cy="5" r="3"/>
-        <circle cx="6" cy="12" r="3"/>
-        <circle cx="18" cy="19" r="3"/>
+        <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
         <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
         <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
       </svg>
@@ -591,7 +579,7 @@
     <div class="ov-icon">🤲</div>
     <div class="ov-title">Alhamdulillah!</div>
     <div class="ov-arabic" id="ov-arabic"></div>
-    <div class="ov-msg" id="ov-msg"></div>
+    <div class="ov-msg"    id="ov-msg"></div>
     <div class="ov-btns">
       <button class="btn-gold"    id="ov-share-btn">Share 🌙</button>
       <button class="btn-outline" id="ov-continue-btn">Continue</button>
@@ -599,7 +587,7 @@
     </div>
   </div>
 
-  <!-- ── SETTINGS MODAL ────────────────────────────────────────────────────── -->
+  <!-- ── CUSTOM TARGET MODAL ───────────────────────────────────────────────── -->
   <div class="modal-bg" id="settings-modal">
     <div class="modal-card">
       <div class="modal-title">Custom Target</div>
@@ -610,6 +598,27 @@
         <button class="btn-gold"    id="modal-set-btn">Set</button>
         <button class="btn-outline" id="modal-cancel-btn">Cancel</button>
       </div>
+    </div>
+  </div>
+
+  <!-- ── DHIKR EDIT / ADD MODAL ────────────────────────────────────────────── -->
+  <div class="modal-bg" id="dhikr-modal">
+    <div class="modal-card">
+      <div class="modal-title" id="dhikr-modal-title">Add Recitation</div>
+      <div class="modal-hint" id="dhikr-modal-hint">Fill in the details below</div>
+
+      <input type="text"   class="modal-input" id="dhikr-name-input"
+             placeholder="Name  (e.g. SubhanAllah)" autocomplete="off">
+      <input type="text"   class="modal-input" id="dhikr-arabic-input"
+             placeholder="Arabic text  (optional)" dir="rtl" autocomplete="off">
+      <input type="number" class="modal-input" id="dhikr-target-input"
+             placeholder="Count target  (e.g. 33)" min="1" max="10000" inputmode="numeric">
+
+      <div class="modal-btns">
+        <button class="btn-gold"    id="dhikr-save-btn">Save</button>
+        <button class="btn-outline" id="dhikr-cancel-btn">Cancel</button>
+      </div>
+      <button class="btn-danger" id="dhikr-delete-btn" style="display:none">Delete this recitation</button>
     </div>
   </div>
 
@@ -635,7 +644,8 @@
         </button>
         <button class="share-opt" id="copy-btn">
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+            <rect x="9" y="9" width="13" height="13" rx="2"/>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
           </svg>
           Copy
         </button>
@@ -647,29 +657,36 @@
   <div class="toast" id="toast"></div>
 
   <script>
-    // ── DHIKR DATA ──────────────────────────────────────────────────────────
-    const DHIKR = [
-      { name: 'SubhanAllah',     arabic: 'سُبْحَانَ اللهِ',            target: 33  },
-      { name: 'Alhamdulillah',   arabic: 'الْحَمْدُ لِلَّهِ',          target: 33  },
-      { name: 'Allahu Akbar',    arabic: 'اللَّهُ أَكْبَرُ',           target: 34  },
-      { name: 'Astaghfirullah',  arabic: 'أَسْتَغْفِرُ اللَّهَ',       target: 100 },
-      { name: 'Durood Sharif',   arabic: 'صَلِّ عَلَى النَّبِيِّ',     target: 100 },
+    // ── DEFAULT DHIKR LIST ───────────────────────────────────────────────────
+    const DEFAULT_DHIKR = [
+      { name: 'SubhanAllah',    arabic: 'سُبْحَانَ اللهِ',            target: 33  },
+      { name: 'Alhamdulillah', arabic: 'الْحَمْدُ لِلَّهِ',          target: 33  },
+      { name: 'Allahu Akbar',  arabic: 'اللَّهُ أَكْبَرُ',           target: 34  },
+      { name: 'Astaghfirullah',arabic: 'أَسْتَغْفِرُ اللَّهَ',       target: 100 },
+      { name: 'Durood Sharif', arabic: 'صَلِّ عَلَى النَّبِيِّ',     target: 100 },
     ];
 
     // ── RING GEOMETRY ────────────────────────────────────────────────────────
     const R    = 122;
-    const CIRC = +(2 * Math.PI * R).toFixed(2); // ≈ 766.55
+    const CIRC = +(2 * Math.PI * R).toFixed(2);
 
     // ── STATE ────────────────────────────────────────────────────────────────
+    let dhikrList = JSON.parse(localStorage.getItem('tasbih_dhikr') || 'null') || DEFAULT_DHIKR.map(d => ({...d}));
     let count        = 0;
     let dhikrIdx     = 0;
     let customTarget = null;
     let completed    = false;
     let saved        = false;
+    let editMode     = false;
     let sessions     = JSON.parse(localStorage.getItem('tasbih_v2') || '[]');
 
-    const getTarget   = () => customTarget ?? DHIKR[dhikrIdx].target;
+    // editing state for dhikr modal
+    let dhikrModalMode = 'add'; // 'add' | 'edit'
+    let dhikrEditIdx   = -1;
+
+    const getTarget   = () => customTarget ?? dhikrList[dhikrIdx].target;
     const getProgress = () => Math.min(count / getTarget(), 1);
+    const curDhikr    = () => dhikrList[dhikrIdx];
 
     // ── DOM ──────────────────────────────────────────────────────────────────
     const $countNum  = document.getElementById('count-num');
@@ -683,39 +700,190 @@
     const $sharePrev = document.getElementById('share-preview');
     const $toast     = document.getElementById('toast');
     const $settModal = document.getElementById('settings-modal');
+    const $dhikrModal= document.getElementById('dhikr-modal');
+    const $editBtn   = document.getElementById('edit-dhikr-btn');
+    const chipRow    = document.getElementById('chip-row');
 
     // init ring
     $ringFill.style.strokeDasharray  = CIRC;
     $ringFill.style.strokeDashoffset = CIRC;
 
+    // ── SAVE DHIKR LIST ──────────────────────────────────────────────────────
+    function saveDhikrList() {
+      localStorage.setItem('tasbih_dhikr', JSON.stringify(dhikrList));
+    }
+
     // ── BUILD CHIPS ──────────────────────────────────────────────────────────
-    const chipRow = document.getElementById('chip-row');
-    DHIKR.forEach((d, i) => {
-      const btn = document.createElement('button');
-      btn.className = 'chip' + (i === 0 ? ' active' : '');
-      btn.textContent = d.name;
-      btn.addEventListener('click', () => selectDhikr(i));
-      chipRow.appendChild(btn);
-    });
-    const customChip = document.createElement('button');
-    customChip.className = 'chip';
-    customChip.id = 'custom-chip';
-    customChip.textContent = '+ Custom';
-    customChip.addEventListener('click', openSettings);
-    chipRow.appendChild(customChip);
+    function buildChips() {
+      chipRow.innerHTML = '';
+
+      dhikrList.forEach((d, i) => {
+        const isActive = (i === dhikrIdx && !customTarget);
+
+        if (editMode) {
+          // name part (tapping opens edit)
+          const namBtn = document.createElement('button');
+          namBtn.className = 'chip chip-edit-name' + (isActive ? ' active' : '');
+          namBtn.textContent = d.name;
+          namBtn.addEventListener('click', () => openDhikrModal('edit', i));
+          chipRow.appendChild(namBtn);
+
+          // delete ×
+          const delBtn = document.createElement('button');
+          delBtn.className = 'chip-del';
+          delBtn.setAttribute('aria-label', `Delete ${d.name}`);
+          delBtn.innerHTML = '&times;';
+          delBtn.addEventListener('click', () => deleteDhikr(i));
+          chipRow.appendChild(delBtn);
+        } else {
+          const btn = document.createElement('button');
+          btn.className = 'chip' + (isActive ? ' active' : '');
+          btn.textContent = d.name;
+          btn.addEventListener('click', () => selectDhikr(i));
+          chipRow.appendChild(btn);
+        }
+      });
+
+      if (editMode) {
+        // + Add chip
+        const addBtn = document.createElement('button');
+        addBtn.className = 'chip chip-add';
+        addBtn.textContent = '+ Add';
+        addBtn.addEventListener('click', () => openDhikrModal('add', -1));
+        chipRow.appendChild(addBtn);
+
+        // Done chip
+        const doneBtn = document.createElement('button');
+        doneBtn.className = 'chip chip-done';
+        doneBtn.textContent = '✓ Done';
+        doneBtn.addEventListener('click', toggleEditMode);
+        chipRow.appendChild(doneBtn);
+      } else {
+        // Custom target chip
+        const customChip = document.createElement('button');
+        customChip.className = 'chip' + (customTarget ? ' active' : '');
+        customChip.id = 'custom-chip';
+        customChip.textContent = customTarget ? `⚙ ${customTarget}` : '+ Custom';
+        customChip.addEventListener('click', openSettings);
+        chipRow.appendChild(customChip);
+      }
+    }
 
     function selectDhikr(i) {
-      dhikrIdx = i;
+      dhikrIdx     = i;
       customTarget = null;
-      document.querySelectorAll('.chip').forEach((c, ci) =>
-        c.classList.toggle('active', ci === i));
       doReset(false);
+      buildChips();
+    }
+
+    // ── EDIT MODE TOGGLE ─────────────────────────────────────────────────────
+    function toggleEditMode() {
+      editMode = !editMode;
+      $editBtn.classList.toggle('active-mode', editMode);
+      buildChips();
+    }
+
+    $editBtn.addEventListener('click', toggleEditMode);
+
+    // ── DHIKR MODAL ──────────────────────────────────────────────────────────
+    function openDhikrModal(mode, idx) {
+      dhikrModalMode = mode;
+      dhikrEditIdx   = idx;
+
+      const $title  = document.getElementById('dhikr-modal-title');
+      const $hint   = document.getElementById('dhikr-modal-hint');
+      const $name   = document.getElementById('dhikr-name-input');
+      const $arabic = document.getElementById('dhikr-arabic-input');
+      const $target = document.getElementById('dhikr-target-input');
+      const $delBtn = document.getElementById('dhikr-delete-btn');
+
+      if (mode === 'edit') {
+        const d    = dhikrList[idx];
+        $title.textContent  = 'Edit Recitation';
+        $hint.textContent   = 'Tap name to edit, or delete below';
+        $name.value         = d.name;
+        $arabic.value       = d.arabic || '';
+        $target.value       = d.target;
+        $delBtn.style.display = dhikrList.length > 1 ? 'block' : 'none';
+      } else {
+        $title.textContent  = 'Add Recitation';
+        $hint.textContent   = 'Fill in the details below';
+        $name.value   = '';
+        $arabic.value = '';
+        $target.value = '';
+        $delBtn.style.display = 'none';
+      }
+
+      $dhikrModal.classList.add('show');
+      setTimeout(() => $name.focus(), 120);
+    }
+
+    document.getElementById('dhikr-cancel-btn').addEventListener('click', () =>
+      $dhikrModal.classList.remove('show'));
+
+    $dhikrModal.addEventListener('click', e => {
+      if (e.target === $dhikrModal) $dhikrModal.classList.remove('show');
+    });
+
+    document.getElementById('dhikr-save-btn').addEventListener('click', () => {
+      const name   = document.getElementById('dhikr-name-input').value.trim();
+      const arabic = document.getElementById('dhikr-arabic-input').value.trim();
+      const target = parseInt(document.getElementById('dhikr-target-input').value, 10);
+
+      if (!name) { showToast('Please enter a name'); return; }
+      if (!target || target < 1 || target > 10000) {
+        showToast('Enter a target between 1 and 10,000');
+        return;
+      }
+
+      if (dhikrModalMode === 'add') {
+        dhikrList.push({ name, arabic, target });
+        dhikrIdx = dhikrList.length - 1;
+        customTarget = null;
+        doReset(false);
+      } else {
+        dhikrList[dhikrEditIdx] = { name, arabic, target };
+        if (dhikrEditIdx === dhikrIdx) {
+          // refresh counter display if currently active
+          doReset(false);
+        }
+      }
+
+      saveDhikrList();
+      buildChips();
+      render();
+      $dhikrModal.classList.remove('show');
+      showToast(dhikrModalMode === 'add' ? `"${name}" added ✓` : `"${name}" updated ✓`);
+    });
+
+    document.getElementById('dhikr-delete-btn').addEventListener('click', () => {
+      deleteDhikr(dhikrEditIdx);
+      $dhikrModal.classList.remove('show');
+    });
+
+    function deleteDhikr(i) {
+      if (dhikrList.length <= 1) {
+        showToast('You need at least one recitation');
+        return;
+      }
+      const name = dhikrList[i].name;
+      dhikrList.splice(i, 1);
+
+      // keep dhikrIdx valid
+      if (dhikrIdx >= dhikrList.length) dhikrIdx = 0;
+      else if (dhikrIdx > i)            dhikrIdx--;
+
+      customTarget = null;
+      saveDhikrList();
+      buildChips();
+      doReset(false);
+      showToast(`"${name}" deleted`);
     }
 
     // ── RENDER ───────────────────────────────────────────────────────────────
     function render() {
-      const d = DHIKR[dhikrIdx];
-      $arabicTxt.textContent = d.arabic;
+      const d = curDhikr();
+      $arabicTxt.textContent = d.arabic || '';
       $countNum.textContent  = count;
 
       $ringFill.style.strokeDashoffset = CIRC * (1 - getProgress());
@@ -762,11 +930,12 @@
       }
     }
 
-    // use pointerdown so it fires immediately on touch without the 300ms delay
     $tapBtn.addEventListener('pointerdown', e => { e.preventDefault(); handleTap(); });
-    // Space / Enter keyboard support
+
     document.addEventListener('keydown', e => {
-      if ((e.code === 'Space' || e.code === 'Enter') && !document.querySelector('.modal-bg.show') && !$settModal.classList.contains('show')) {
+      if ((e.code === 'Space' || e.code === 'Enter') &&
+          !document.querySelector('.modal-bg.show') &&
+          !document.querySelector('.overlay.show')) {
         e.preventDefault();
         handleTap();
       }
@@ -774,9 +943,7 @@
 
     // ── HAPTIC ───────────────────────────────────────────────────────────────
     function haptic(pattern) {
-      if ('vibrate' in navigator) {
-        try { navigator.vibrate(pattern); } catch (_) {}
-      }
+      if ('vibrate' in navigator) { try { navigator.vibrate(pattern); } catch (_) {} }
     }
 
     // ── UNDO ─────────────────────────────────────────────────────────────────
@@ -813,7 +980,7 @@
     function saveSession() {
       saved = true;
       sessions.unshift({
-        dhikr:  DHIKR[dhikrIdx].name,
+        dhikr:  curDhikr().name,
         count,
         target: getTarget(),
         done:   count >= getTarget(),
@@ -829,8 +996,8 @@
       haptic([70, 35, 70, 35, 150]);
       $ringFill.classList.add('done-pulse');
 
-      const d = DHIKR[dhikrIdx];
-      document.getElementById('ov-arabic').textContent = d.arabic;
+      const d = curDhikr();
+      document.getElementById('ov-arabic').textContent = d.arabic || d.name;
       document.getElementById('ov-msg').textContent =
         `You completed ${getTarget()} ${d.name}. May Allah accept your dhikr and reward you abundantly. 🤍`;
 
@@ -848,10 +1015,10 @@
 
     // ── SHARE ────────────────────────────────────────────────────────────────
     function buildShareText() {
-      const d    = DHIKR[dhikrIdx];
+      const d    = curDhikr();
       const done = count >= getTarget();
       const line1 = done
-        ? `🤲 Alhamdulillah! I just completed ${getTarget()} ${d.name} (${d.arabic})!`
+        ? `🤲 Alhamdulillah! I just completed ${getTarget()} ${d.name}${d.arabic ? ' (' + d.arabic + ')' : ''}!`
         : `🌙 I've counted ${count} out of ${getTarget()} ${d.name} today!`;
       return `${line1}\n\nJoin me in daily dhikr — track your counts with the Tasbih Counter ✨`;
     }
@@ -861,49 +1028,33 @@
       $drawerBg.classList.add('show');
     }
 
-    // close drawer on background tap
     $drawerBg.addEventListener('click', e => {
       if (e.target === $drawerBg) $drawerBg.classList.remove('show');
     });
 
-    // WhatsApp
     document.getElementById('wa-btn').addEventListener('click', () => {
-      const text = encodeURIComponent(buildShareText() + '\n' + location.href);
-      window.open(`https://wa.me/?text=${text}`, '_blank');
+      window.open(`https://wa.me/?text=${encodeURIComponent(buildShareText() + '\n' + location.href)}`, '_blank');
       $drawerBg.classList.remove('show');
     });
 
-    // Native share
     document.getElementById('native-share-btn').addEventListener('click', async () => {
       $drawerBg.classList.remove('show');
       if (navigator.share) {
-        try {
-          await navigator.share({
-            title: 'Tasbih Counter',
-            text:  buildShareText(),
-            url:   location.href,
-          });
-        } catch (_) {}
-      } else {
-        copyToClipboard();
-      }
+        try { await navigator.share({ title: 'Tasbih Counter', text: buildShareText(), url: location.href }); }
+        catch (_) {}
+      } else { copyToClipboard(); }
     });
 
-    // Copy to clipboard
     document.getElementById('copy-btn').addEventListener('click', copyToClipboard);
 
     async function copyToClipboard() {
-      const text = buildShareText() + '\n\n' + location.href;
       try {
-        await navigator.clipboard.writeText(text);
+        await navigator.clipboard.writeText(buildShareText() + '\n\n' + location.href);
         $drawerBg.classList.remove('show');
         showToast('Copied to clipboard 📋');
-      } catch (_) {
-        showToast('Could not copy — try selecting manually');
-      }
+      } catch (_) { showToast('Could not copy — try selecting manually'); }
     }
 
-    // main share button opens drawer
     document.getElementById('share-btn').addEventListener('click', openShareDrawer);
 
     // ── TOAST ────────────────────────────────────────────────────────────────
@@ -923,6 +1074,10 @@
     document.getElementById('modal-cancel-btn').addEventListener('click', () =>
       $settModal.classList.remove('show'));
 
+    $settModal.addEventListener('click', e => {
+      if (e.target === $settModal) $settModal.classList.remove('show');
+    });
+
     document.getElementById('modal-set-btn').addEventListener('click', () => {
       const val = parseInt(document.getElementById('custom-input').value, 10);
       if (!val || val < 1 || val > 10000) {
@@ -930,20 +1085,14 @@
         return;
       }
       customTarget = val;
-      document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-      document.getElementById('custom-chip').classList.add('active');
-      document.getElementById('custom-chip').textContent = `⚙ ${val}`;
+      buildChips();
       doReset(false);
       $settModal.classList.remove('show');
       showToast(`Target set to ${val} 🎯`);
     });
 
-    // close settings on background tap
-    $settModal.addEventListener('click', e => {
-      if (e.target === $settModal) $settModal.classList.remove('show');
-    });
-
     // ── BOOT ─────────────────────────────────────────────────────────────────
+    buildChips();
     render();
     renderSessions();
   </script>
