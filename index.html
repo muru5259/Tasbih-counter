@@ -1520,14 +1520,15 @@
     // ── SURAH FEATURE ────────────────────────────────────────────────────────
     const DEFAULT_SURAHS = [
       { num: 36, arabic: 'يٰسٓ', name: 'Ya-Seen', verses: 83, type: 'Meccan', pdf: 'yaseen.pdf', audio: 'yaseen.mp3' },
+      { num: null, label: 'Dua', arabic: 'دُعَاءُ الكَامِل', name: 'Dua Al Kamil', type: 'Supplication', pdf: 'dua-al-kamil.pdf' },
     ];
 
-    let surahList          = JSON.parse(localStorage.getItem('tasbih_surahs_v3') || 'null') || DEFAULT_SURAHS.map(s => ({...s}));
+    let surahList          = JSON.parse(localStorage.getItem('tasbih_surahs_v4') || 'null') || DEFAULT_SURAHS.map(s => ({...s}));
     let surahEditMode      = false;
     let currentReaderSurah = null;
 
     function saveSurahList() {
-      localStorage.setItem('tasbih_surahs_v3', JSON.stringify(surahList));
+      localStorage.setItem('tasbih_surahs_v4', JSON.stringify(surahList));
     }
 
     function buildSurahGrid() {
@@ -1539,10 +1540,10 @@
         const card = document.createElement('div');
         card.className = 'surah-card';
         card.innerHTML =
-          `<div class="surah-num">Surah ${s.num}</div>` +
+          `<div class="surah-num">${s.label || 'Surah ' + s.num}</div>` +
           `<div class="surah-arabic">${s.arabic}</div>` +
           `<div class="surah-name">${s.name}</div>` +
-          `<div class="surah-meta">${s.verses} verses &middot; ${s.type}</div>` +
+          `<div class="surah-meta">${s.verses ? s.verses + ' verses · ' : ''}${s.type || ''}</div>` +
           `<button class="card-del" aria-label="Remove">&times;</button>`;
         if (!surahEditMode) {
           card.addEventListener('click', () => openReader(s));
@@ -1715,7 +1716,7 @@
       const $rBody = document.getElementById('reader-body');
 
       $rAr.textContent  = surah.arabic;
-      $rSub.textContent = `${surah.name} · ${surah.verses} verses`;
+      $rSub.textContent = surah.verses ? `${surah.name} · ${surah.verses} verses` : surah.name;
       $rov.classList.add('show');
 
       setupAudio(surah.audio);
