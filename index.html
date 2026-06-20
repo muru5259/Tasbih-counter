@@ -832,6 +832,27 @@
       flex-shrink: 0; min-width: 34px; text-align: right;
     }
 
+    .audio-speeds {
+      display: flex; gap: 4px; flex-shrink: 0;
+    }
+    .speed-btn {
+      padding: 4px 7px;
+      border-radius: 10px;
+      border: 1px solid var(--gold-dim);
+      background: transparent;
+      color: var(--text-dim);
+      font-size: 0.65rem; font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .speed-btn.active {
+      background: var(--gold);
+      border-color: var(--gold);
+      color: #162010;
+    }
+    .speed-btn:active { opacity: 0.75; }
+
     /* ── PDF PAGES ──────────────────────────────────────── */
     .pdf-pages {
       display: flex; flex-direction: column;
@@ -1061,6 +1082,12 @@
         <input type="range" class="audio-seek" id="audio-seek" min="0" max="100" value="0" step="0.1" aria-label="Seek">
       </div>
       <div class="audio-time" id="audio-time">0:00</div>
+      <div class="audio-speeds">
+        <button class="speed-btn active" data-speed="1">1×</button>
+        <button class="speed-btn" data-speed="1.5">1.5×</button>
+        <button class="speed-btn" data-speed="2">2×</button>
+        <button class="speed-btn" data-speed="2.5">2.5×</button>
+      </div>
       <audio id="audio-el" preload="metadata"></audio>
     </div>
     <div class="reader-body" id="reader-body">
@@ -1809,6 +1836,17 @@
       }
     });
 
+    // Speed buttons
+    document.querySelectorAll('.speed-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const speed = parseFloat(btn.dataset.speed);
+        $audioEl.playbackRate = speed;
+        document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        haptic(14);
+      });
+    });
+
     $audioSeek.addEventListener('input', () => {
       if ($audioEl.duration) {
         $audioEl.currentTime = ($audioSeek.value / 100) * $audioEl.duration;
@@ -1818,7 +1856,10 @@
     function stopAudio() {
       $audioEl.pause();
       $audioEl.currentTime = 0;
+      $audioEl.playbackRate = 1;
       showPlayIcon(false);
+      document.querySelectorAll('.speed-btn').forEach(b =>
+        b.classList.toggle('active', b.dataset.speed === '1'));
     }
 
     document.getElementById('reader-close').addEventListener('click', () => {
