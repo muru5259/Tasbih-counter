@@ -740,7 +740,21 @@
       flex-direction: column; gap: 12px;
       color: var(--text-dim); font-size: 0.88rem; text-align: center; padding: 30px;
     }
-  </style>
+
+    /* ── PDF PAGES ──────────────────────────────────────── */
+    .pdf-pages {
+      display: flex; flex-direction: column;
+      gap: 10px;
+      padding: 10px 0 30px;
+      background: #1a1a1a;
+    }
+    .pdf-page {
+      display: block;
+      width: 100%; height: auto;
+      background: #fff;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.4);
+    }
+</style>
 </head>
 <body>
 
@@ -1520,6 +1534,68 @@
       }
     });
 
+    // PDF.js — lazy-loaded so the library only downloads when a PDF is opened
+    let pdfJsReady = null;
+    function loadPdfJs() {
+      if (pdfJsReady) return pdfJsReady;
+      pdfJsReady = new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+        s.onload = () => {
+          window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+            'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+          resolve(window.pdfjsLib);
+        };
+        s.onerror = reject;
+        document.head.appendChild(s);
+      });
+      return pdfJsReady;
+    }
+
+    async function renderPdf(url, $container) {
+      $container.style.padding  = '0';
+      $container.style.overflow = 'auto';
+      $container.innerHTML = '<div class="reader-loading"><div class="spinner"></div><span>Loading…</span></div>';
+      try {
+        const pdfjsLib = await loadPdfJs();
+        const pdf = await pdfjsLib.getDocument(url).promise;
+
+        $container.innerHTML = '';
+        const wrap = document.createElement('div');
+        wrap.className = 'pdf-pages';
+        $container.appendChild(wrap);
+
+        const dpr      = Math.min(window.devicePixelRatio || 1, 2);
+        const cssWidth = $container.clientWidth || window.innerWidth;
+
+        for (let n = 1; n <= pdf.numPages; n++) {
+          const page     = await pdf.getPage(n);
+          const base     = page.getViewport({ scale: 1 });
+          const scale    = cssWidth / base.width;
+          const viewport = page.getViewport({ scale: scale * dpr });
+
+          const canvas  = document.createElement('canvas');
+          canvas.className   = 'pdf-page';
+          canvas.width       = viewport.width;
+          canvas.height      = viewport.height;
+          canvas.style.width = '100%';
+          canvas.style.height= 'auto';
+          wrap.appendChild(canvas);
+
+          await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+        }
+      } catch (_) {
+        $container.innerHTML =
+          '<div class="reader-error">' +
+          '<div>⚠️ Could not open PDF</div>' +
+          '<div>Check your internet connection.</div>' +
+          '<button class="btn-outline" id="retry-btn" style="margin-top:12px">Retry</button>' +
+          '</div>';
+        const r = document.getElementById('retry-btn');
+        if (r) r.addEventListener('click', () => openReader(currentReaderSurah));
+      }
+    }
+
     // Reader
     async function openReader(surah) {
       currentReaderSurah = surah;
@@ -1533,9 +1609,7 @@
       $rov.classList.add('show');
 
       if (surah.pdf) {
-        $rBody.style.padding  = '0';
-        $rBody.style.overflow = 'hidden';
-        $rBody.innerHTML = `<iframe src="${surah.pdf}" style="width:100%;height:100%;border:none;display:block;"></iframe>`;
+        renderPdf(surah.pdf, $rBody);
         return;
       }
 
