@@ -1395,18 +1395,15 @@
 
     // ── SURAH FEATURE ────────────────────────────────────────────────────────
     const DEFAULT_SURAHS = [
-      { num: 1,   arabic: 'الفاتحة', name: 'Al-Fatiha', verses: 7,  type: 'Meccan' },
-      { num: 112, arabic: 'الإخلاص', name: 'Al-Ikhlas', verses: 4,  type: 'Meccan' },
-      { num: 113, arabic: 'الفلق',   name: 'Al-Falaq',  verses: 5,  type: 'Meccan' },
-      { num: 114, arabic: 'الناس',   name: 'An-Nas',    verses: 6,  type: 'Meccan' },
+      { num: 36, arabic: 'يٰسٓ', name: 'Ya-Seen', verses: 83, type: 'Meccan', pdf: 'yaseen.pdf' },
     ];
 
-    let surahList          = JSON.parse(localStorage.getItem('tasbih_surahs') || 'null') || DEFAULT_SURAHS.map(s => ({...s}));
+    let surahList          = JSON.parse(localStorage.getItem('tasbih_surahs_v2') || 'null') || DEFAULT_SURAHS.map(s => ({...s}));
     let surahEditMode      = false;
     let currentReaderSurah = null;
 
     function saveSurahList() {
-      localStorage.setItem('tasbih_surahs', JSON.stringify(surahList));
+      localStorage.setItem('tasbih_surahs_v2', JSON.stringify(surahList));
     }
 
     function buildSurahGrid() {
@@ -1533,8 +1530,18 @@
 
       $rAr.textContent  = surah.arabic;
       $rSub.textContent = `${surah.name} · ${surah.verses} verses`;
-      $rBody.innerHTML  = '<div class="reader-loading"><div class="spinner"></div><span>Loading…</span></div>';
       $rov.classList.add('show');
+
+      if (surah.pdf) {
+        $rBody.style.padding  = '0';
+        $rBody.style.overflow = 'hidden';
+        $rBody.innerHTML = `<iframe src="${surah.pdf}" style="width:100%;height:100%;border:none;display:block;"></iframe>`;
+        return;
+      }
+
+      $rBody.style.padding  = '';
+      $rBody.style.overflow = '';
+      $rBody.innerHTML = '<div class="reader-loading"><div class="spinner"></div><span>Loading…</span></div>';
 
       try {
         const res  = await fetch(`https://api.alquran.cloud/v1/surah/${surah.num}/editions/quran-uthmani,en.asad`);
@@ -1564,8 +1571,13 @@
       }
     }
 
-    document.getElementById('reader-close').addEventListener('click', () =>
-      document.getElementById('reader-overlay').classList.remove('show'));
+    document.getElementById('reader-close').addEventListener('click', () => {
+      document.getElementById('reader-overlay').classList.remove('show');
+      const $rBody = document.getElementById('reader-body');
+      $rBody.style.padding  = '';
+      $rBody.style.overflow = '';
+      $rBody.innerHTML      = '';
+    });
 
     // ── BOOT ─────────────────────────────────────────────────────────────────
     buildChips();
