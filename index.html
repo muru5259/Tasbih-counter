@@ -436,6 +436,39 @@
     }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+    /* ── UPDATE BANNER ──────────────────────────────────── */
+    .update-banner {
+      position: fixed;
+      top: 10px; left: 12px; right: 12px;
+      max-width: 456px; margin: 0 auto;
+      background: var(--gold);
+      color: #162010;
+      border-radius: 14px;
+      padding: 9px 10px 9px 16px;
+      display: flex; align-items: center; gap: 10px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.45);
+      z-index: 600;
+      transform: translateY(-180%);
+      transition: transform 0.35s cubic-bezier(.4,0,.2,1);
+    }
+    .update-banner.show { transform: translateY(0); }
+    .update-text { flex: 1; font-size: 0.82rem; font-weight: 600; }
+    .update-btn {
+      flex-shrink: 0;
+      background: #162010; color: var(--gold-lt);
+      border: none; border-radius: 18px;
+      padding: 7px 16px; font-size: 0.8rem; font-weight: 700;
+      cursor: pointer;
+    }
+    .update-btn:active { opacity: 0.85; }
+    .update-dismiss {
+      flex-shrink: 0;
+      width: 24px; height: 24px; border-radius: 50%;
+      border: none; background: rgba(0,0,0,0.12);
+      color: #162010; font-size: 1rem; line-height: 1; cursor: pointer;
+    }
+    .update-dismiss:active { background: rgba(0,0,0,0.22); }
+
     /* ── INSTALL HINT (iOS Add-to-Home-Screen) ──────────── */
     .install-hint {
       position: fixed;
@@ -997,6 +1030,13 @@
 
   <!-- TOAST -->
   <div class="toast" id="toast"></div>
+
+  <!-- UPDATE BANNER (shown when a new version is available) -->
+  <div class="update-banner" id="update-banner">
+    <span class="update-text">🌙 A new version is available</span>
+    <button class="update-btn" id="update-btn">Update</button>
+    <button class="update-dismiss" id="update-dismiss" aria-label="Dismiss">&times;</button>
+  </div>
 
   <!-- SURAH READER OVERLAY -->
   <div class="reader-overlay" id="reader-overlay">
@@ -1791,18 +1831,48 @@
       stopAudio();
     });
 
-    // ── SERVICE WORKER (keeps the installed app up to date) ──────────────────
+    // ── SERVICE WORKER + UPDATE BANNER ───────────────────────────────────────
+    function showUpdateBanner(onUpdate) {
+      const $b = document.getElementById('update-banner');
+      if ($b.classList.contains('show')) return;
+      $b.classList.add('show');
+      document.getElementById('update-btn').onclick = () => {
+        $b.classList.remove('show');
+        onUpdate();
+      };
+      document.getElementById('update-dismiss').onclick = () => $b.classList.remove('show');
+    }
+
     if ('serviceWorker' in navigator) {
+      // When the new worker takes control, reload once to show the latest UI.
+      let refreshing = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (refreshing) return;
+        refreshing = true;
+        window.location.reload();
+      });
+
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('sw.js').then((reg) => {
-          // Check for a new version every time the app is opened.
           reg.update();
-          // When a new worker takes control, reload once so the latest UI shows.
-          let refreshing = false;
-          navigator.serviceWorker.addEventListener('controllerchange', () => {
-            if (refreshing) return;
-            refreshing = true;
-            window.location.reload();
+
+          const promptFor = (worker) => {
+            if (!worker) return;
+            showUpdateBanner(() => worker.postMessage('SKIP_WAITING'));
+          };
+
+          // A new worker is already waiting from a previous visit.
+          if (reg.waiting && navigator.serviceWorker.controller) promptFor(reg.waiting);
+
+          // A new worker is being installed right now.
+          reg.addEventListener('updatefound', () => {
+            const nw = reg.installing;
+            if (!nw) return;
+            nw.addEventListener('statechange', () => {
+              if (nw.state === 'installed' && navigator.serviceWorker.controller) {
+                promptFor(nw);
+              }
+            });
           });
         }).catch(() => {});
       });
