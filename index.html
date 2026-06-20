@@ -1545,15 +1545,15 @@
     // ── SURAH FEATURE ────────────────────────────────────────────────────────
     const DEFAULT_SURAHS = [
       { num: 36, arabic: 'يٰسٓ', name: 'Ya-Seen', verses: 83, type: 'Meccan', pdf: 'yaseen.pdf', audio: 'yaseen.mp3' },
-      { num: null, label: 'Dua', arabic: 'دُعَاءُ الكَامِل', name: 'Dua Al Kamil', type: 'Supplication', pdf: 'dua-al-kamil.pdf' },
+      { num: null, label: 'Dua', arabic: 'دُعَاءُ الكَامِل', name: 'Dua Al Kamil', type: 'Supplication', pdf: 'dua-al-kamil.pdf', audio: 'dua-al-kamil.mp3' },
     ];
 
-    let surahList          = JSON.parse(localStorage.getItem('tasbih_surahs_v4') || 'null') || DEFAULT_SURAHS.map(s => ({...s}));
+    let surahList          = JSON.parse(localStorage.getItem('tasbih_surahs_v5') || 'null') || DEFAULT_SURAHS.map(s => ({...s}));
     let surahEditMode      = false;
     let currentReaderSurah = null;
 
     function saveSurahList() {
-      localStorage.setItem('tasbih_surahs_v4', JSON.stringify(surahList));
+      localStorage.setItem('tasbih_surahs_v5', JSON.stringify(surahList));
     }
 
     function buildSurahGrid() {
