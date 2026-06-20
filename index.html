@@ -1102,11 +1102,8 @@
   <script>
     // ── DEFAULT DHIKR LIST ───────────────────────────────────────────────────
     const DEFAULT_DHIKR = [
-      { name: 'SubhanAllah',    arabic: 'سُبْحَانَ اللهِ',            target: 1000 },
-      { name: 'Alhamdulillah', arabic: 'الْحَمْدُ لِلَّهِ',          target: 1000 },
-      { name: 'Allahu Akbar',  arabic: 'اللَّهُ أَكْبَرُ',           target: 1000 },
-      { name: 'Astaghfirullah',arabic: 'أَسْتَغْفِرُ اللَّهَ',       target: 1000},
-      { name: 'Durood Sharif', arabic: 'صَلِّ عَلَى النَّبِيِّ',     target: 1000},
+      { name: 'Alhamdulillah', arabic: 'الْحَمْدُ لِلَّهِ',    target: 1000 },
+      { name: 'Astaghfirullah',arabic: 'أَسْتَغْفِرُ اللَّهَ', target: 1000 },
     ];
 
     // ── RING GEOMETRY ────────────────────────────────────────────────────────
@@ -1114,7 +1111,7 @@
     const CIRC = +(2 * Math.PI * R).toFixed(2);
 
     // ── STATE ────────────────────────────────────────────────────────────────
-    let dhikrList = JSON.parse(localStorage.getItem('tasbih_dhikr_v2') || 'null') || DEFAULT_DHIKR.map(d => ({...d}));
+    let dhikrList = JSON.parse(localStorage.getItem('tasbih_dhikr_v3') || 'null') || DEFAULT_DHIKR.map(d => ({...d}));
     let count        = 0;
     let dhikrIdx     = 0;
     let customTarget = null;
@@ -1150,7 +1147,7 @@
 
     // ── SAVE DHIKR LIST ──────────────────────────────────────────────────────
     function saveDhikrList() {
-      localStorage.setItem('tasbih_dhikr_v2', JSON.stringify(dhikrList));
+      localStorage.setItem('tasbih_dhikr_v3', JSON.stringify(dhikrList));
     }
 
     // ── BUILD CHIPS ──────────────────────────────────────────────────────────
