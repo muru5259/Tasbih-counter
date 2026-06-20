@@ -1791,6 +1791,23 @@
       stopAudio();
     });
 
+    // ── SERVICE WORKER (keeps the installed app up to date) ──────────────────
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').then((reg) => {
+          // Check for a new version every time the app is opened.
+          reg.update();
+          // When a new worker takes control, reload once so the latest UI shows.
+          let refreshing = false;
+          navigator.serviceWorker.addEventListener('controllerchange', () => {
+            if (refreshing) return;
+            refreshing = true;
+            window.location.reload();
+          });
+        }).catch(() => {});
+      });
+    }
+
     // ── BOOT ─────────────────────────────────────────────────────────────────
     buildChips();
     render();
