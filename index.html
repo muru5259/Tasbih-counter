@@ -741,6 +741,64 @@
       color: var(--text-dim); font-size: 0.88rem; text-align: center; padding: 30px;
     }
 
+    /* ── READER AUDIO PLAYER ────────────────────────────── */
+    .reader-audio {
+      display: none;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 16px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--gold-dim);
+      flex-shrink: 0;
+    }
+    .reader-audio.show { display: flex; }
+
+    .audio-play {
+      width: 42px; height: 42px;
+      border-radius: 50%;
+      border: none;
+      background: var(--gold);
+      color: #162010;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: transform 0.1s;
+      box-shadow: 0 3px 14px rgba(201,162,39,0.35);
+    }
+    .audio-play:active { transform: scale(0.9); }
+    .audio-play svg { width: 20px; height: 20px; }
+
+    .audio-meta { flex: 1; min-width: 0; }
+    .audio-label { font-size: 0.68rem; color: var(--text-dim); margin-bottom: 5px; letter-spacing: 0.5px; }
+
+    .audio-seek {
+      -webkit-appearance: none; appearance: none;
+      width: 100%; height: 4px;
+      border-radius: 2px;
+      background: rgba(201,162,39,0.2);
+      outline: none;
+      cursor: pointer;
+    }
+    .audio-seek::-webkit-slider-thumb {
+      -webkit-appearance: none; appearance: none;
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: var(--gold);
+      cursor: pointer;
+    }
+    .audio-seek::-moz-range-thumb {
+      width: 14px; height: 14px;
+      border: none; border-radius: 50%;
+      background: var(--gold);
+      cursor: pointer;
+    }
+
+    .audio-time {
+      font-size: 0.7rem; color: var(--text-dim);
+      font-variant-numeric: tabular-nums;
+      flex-shrink: 0; min-width: 34px; text-align: right;
+    }
+
     /* ── PDF PAGES ──────────────────────────────────────── */
     .pdf-pages {
       display: flex; flex-direction: column;
@@ -952,6 +1010,18 @@
         <div class="reader-arabic" id="reader-arabic"></div>
         <div class="reader-sub"    id="reader-sub"></div>
       </div>
+    </div>
+    <div class="reader-audio" id="reader-audio">
+      <button class="audio-play" id="audio-play" aria-label="Play recitation">
+        <svg class="ic-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        <svg class="ic-pause" viewBox="0 0 24 24" fill="currentColor" style="display:none"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+      </button>
+      <div class="audio-meta">
+        <div class="audio-label">Listen to recitation</div>
+        <input type="range" class="audio-seek" id="audio-seek" min="0" max="100" value="0" step="0.1" aria-label="Seek">
+      </div>
+      <div class="audio-time" id="audio-time">0:00</div>
+      <audio id="audio-el" preload="metadata"></audio>
     </div>
     <div class="reader-body" id="reader-body">
       <div class="reader-loading"><div class="spinner"></div><span>Loading…</span></div>
@@ -1409,15 +1479,15 @@
 
     // ── SURAH FEATURE ────────────────────────────────────────────────────────
     const DEFAULT_SURAHS = [
-      { num: 36, arabic: 'يٰسٓ', name: 'Ya-Seen', verses: 83, type: 'Meccan', pdf: 'yaseen.pdf' },
+      { num: 36, arabic: 'يٰسٓ', name: 'Ya-Seen', verses: 83, type: 'Meccan', pdf: 'yaseen.pdf', audio: 'yaseen.mp3' },
     ];
 
-    let surahList          = JSON.parse(localStorage.getItem('tasbih_surahs_v2') || 'null') || DEFAULT_SURAHS.map(s => ({...s}));
+    let surahList          = JSON.parse(localStorage.getItem('tasbih_surahs_v3') || 'null') || DEFAULT_SURAHS.map(s => ({...s}));
     let surahEditMode      = false;
     let currentReaderSurah = null;
 
     function saveSurahList() {
-      localStorage.setItem('tasbih_surahs_v2', JSON.stringify(surahList));
+      localStorage.setItem('tasbih_surahs_v3', JSON.stringify(surahList));
     }
 
     function buildSurahGrid() {
@@ -1608,6 +1678,8 @@
       $rSub.textContent = `${surah.name} · ${surah.verses} verses`;
       $rov.classList.add('show');
 
+      setupAudio(surah.audio);
+
       if (surah.pdf) {
         renderPdf(surah.pdf, $rBody);
         return;
@@ -1645,12 +1717,78 @@
       }
     }
 
+    // ── READER AUDIO ─────────────────────────────────────────────────────────
+    const $audioBar  = document.getElementById('reader-audio');
+    const $audioEl   = document.getElementById('audio-el');
+    const $audioPlay = document.getElementById('audio-play');
+    const $audioSeek = document.getElementById('audio-seek');
+    const $audioTime = document.getElementById('audio-time');
+    const $icPlay    = $audioPlay.querySelector('.ic-play');
+    const $icPause   = $audioPlay.querySelector('.ic-pause');
+
+    function fmtTime(s) {
+      if (!isFinite(s)) return '0:00';
+      const m = Math.floor(s / 60);
+      const sec = Math.floor(s % 60).toString().padStart(2, '0');
+      return `${m}:${sec}`;
+    }
+
+    function setupAudio(src) {
+      if (!src) {
+        $audioBar.classList.remove('show');
+        $audioEl.removeAttribute('src');
+        return;
+      }
+      $audioBar.classList.add('show');
+      // only reload if it's a different track
+      if ($audioEl.getAttribute('src') !== src) {
+        $audioEl.src = src;
+        $audioSeek.value = 0;
+        $audioTime.textContent = '0:00';
+      }
+      showPlayIcon(!$audioEl.paused);
+    }
+
+    function showPlayIcon(playing) {
+      $icPlay.style.display  = playing ? 'none'  : 'block';
+      $icPause.style.display = playing ? 'block' : 'none';
+    }
+
+    $audioPlay.addEventListener('click', () => {
+      if ($audioEl.paused) { $audioEl.play(); haptic(14); }
+      else                 { $audioEl.pause(); }
+    });
+
+    $audioEl.addEventListener('play',  () => showPlayIcon(true));
+    $audioEl.addEventListener('pause', () => showPlayIcon(false));
+    $audioEl.addEventListener('ended', () => { showPlayIcon(false); $audioSeek.value = 0; });
+
+    $audioEl.addEventListener('timeupdate', () => {
+      if ($audioEl.duration) {
+        $audioSeek.value = ($audioEl.currentTime / $audioEl.duration) * 100;
+        $audioTime.textContent = fmtTime($audioEl.currentTime);
+      }
+    });
+
+    $audioSeek.addEventListener('input', () => {
+      if ($audioEl.duration) {
+        $audioEl.currentTime = ($audioSeek.value / 100) * $audioEl.duration;
+      }
+    });
+
+    function stopAudio() {
+      $audioEl.pause();
+      $audioEl.currentTime = 0;
+      showPlayIcon(false);
+    }
+
     document.getElementById('reader-close').addEventListener('click', () => {
       document.getElementById('reader-overlay').classList.remove('show');
       const $rBody = document.getElementById('reader-body');
       $rBody.style.padding  = '';
       $rBody.style.overflow = '';
       $rBody.innerHTML      = '';
+      stopAudio();
     });
 
     // ── BOOT ─────────────────────────────────────────────────────────────────
