@@ -68,6 +68,7 @@
       align-items: center;
       -webkit-tap-highlight-color: transparent;
       touch-action: manipulation;
+      padding-bottom: 62px;
     }
 
     /* ── HEADER ─────────────────────────────────────────── */
@@ -549,6 +550,196 @@
     .share-opt:active { transform: scale(0.93); background: rgba(201,162,39,0.18); }
     .share-opt.wa { background: rgba(37,211,102,0.1); border-color: rgba(37,211,102,0.4); color: #25d366; }
     .share-opt.wa:active { background: rgba(37,211,102,0.22); }
+
+    /* ── TAB BAR ────────────────────────────────────────── */
+    .tab-bar {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: 62px;
+      background: var(--surface);
+      border-top: 1px solid var(--gold-dim);
+      display: flex;
+      z-index: 200;
+    }
+    .tab-btn {
+      flex: 1;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 3px;
+      border: none; background: transparent;
+      color: var(--text-dim);
+      font-size: 0.6rem; letter-spacing: 1px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: color 0.18s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .tab-btn svg { width: 22px; height: 22px; }
+    .tab-btn.active { color: var(--gold); }
+
+    /* ── SURAHS SECTION ─────────────────────────────────── */
+    .surahs-section {
+      display: none;
+      flex-direction: column;
+      width: 100%; max-width: 480px;
+      flex: 1;
+      overflow: hidden;
+    }
+    .surahs-section.show { display: flex; }
+
+    .surahs-header {
+      padding: 4px 24px 12px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .surahs-title { font-size: 1rem; font-weight: 600; color: var(--gold); }
+
+    .surah-grid {
+      padding: 0 16px 12px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      flex: 1;
+    }
+
+    .surah-card {
+      background: var(--surface);
+      border: 1px solid var(--gold-dim);
+      border-radius: 14px;
+      padding: 14px 12px 12px;
+      cursor: pointer;
+      transition: all 0.14s;
+      display: flex; flex-direction: column;
+      gap: 3px;
+      position: relative;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .surah-card:active { transform: scale(0.95); background: rgba(201,162,39,0.08); }
+
+    .surah-num { font-size: 0.65rem; color: var(--text-dim); }
+    .surah-arabic {
+      font-size: 1.05rem; color: var(--gold-lt);
+      direction: rtl;
+      font-family: 'Segoe UI', 'Arial Unicode MS', 'Noto Sans Arabic', sans-serif;
+      line-height: 1.5;
+    }
+    .surah-name { font-size: 0.8rem; color: var(--text); font-weight: 500; margin-top: 1px; }
+    .surah-meta { font-size: 0.65rem; color: var(--text-dim); }
+
+    .card-del {
+      position: absolute; top: 7px; right: 7px;
+      width: 22px; height: 22px;
+      border-radius: 50%; border: none;
+      background: rgba(255,107,107,0.14);
+      color: var(--danger);
+      font-size: 0.88rem; line-height: 1;
+      cursor: pointer;
+      display: none; align-items: center; justify-content: center;
+    }
+    .card-del:active { background: rgba(255,107,107,0.3); }
+    .surah-grid.edit-mode .card-del { display: flex; }
+    .surah-grid.edit-mode .surah-card { cursor: default; }
+    .surah-grid.edit-mode .surah-card:active { transform: none; background: var(--surface); }
+
+    .surah-card-add {
+      border-style: dashed;
+      background: rgba(201,162,39,0.04);
+      align-items: center; justify-content: center;
+      min-height: 96px;
+      color: var(--gold); font-size: 1.8rem;
+      cursor: pointer;
+    }
+
+    /* ── SURAH READER ───────────────────────────────────── */
+    .reader-overlay {
+      position: fixed; inset: 0;
+      background: var(--bg);
+      z-index: 450;
+      display: flex; flex-direction: column;
+      transform: translateY(100%);
+      transition: transform 0.32s cubic-bezier(.4,0,.2,1);
+    }
+    .reader-overlay.show { transform: translateY(0); }
+
+    .reader-header {
+      padding: 14px 18px 12px;
+      display: flex; align-items: center; gap: 12px;
+      border-bottom: 1px solid var(--gold-dim);
+      flex-shrink: 0;
+    }
+    .reader-close {
+      width: 36px; height: 36px; border-radius: 50%;
+      border: 1px solid var(--gold-dim); background: transparent;
+      color: var(--gold); font-size: 1.2rem; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .reader-close:active { background: rgba(201,162,39,0.15); }
+    .reader-info { flex: 1; min-width: 0; }
+    .reader-arabic {
+      font-size: 1.15rem; color: var(--gold-lt); direction: rtl;
+      font-family: 'Segoe UI','Arial Unicode MS','Noto Sans Arabic',sans-serif;
+    }
+    .reader-sub { font-size: 0.72rem; color: var(--text-dim); margin-top: 1px; }
+
+    .reader-body {
+      flex: 1; overflow-y: auto;
+      padding: 20px 20px 40px;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .reader-bismillah {
+      text-align: center;
+      font-size: 1.35rem; color: var(--gold-lt);
+      direction: rtl;
+      font-family: 'Segoe UI','Arial Unicode MS','Noto Sans Arabic',sans-serif;
+      margin-bottom: 22px; line-height: 1.9;
+    }
+
+    .verse-block {
+      margin-bottom: 20px; padding-bottom: 20px;
+      border-bottom: 1px solid rgba(201,162,39,0.1);
+    }
+    .verse-block:last-child { border-bottom: none; }
+
+    .verse-arabic {
+      font-size: 1.3rem; line-height: 2;
+      direction: rtl; text-align: right;
+      color: var(--text);
+      font-family: 'Segoe UI','Arial Unicode MS','Noto Sans Arabic',sans-serif;
+      margin-bottom: 7px;
+    }
+    .verse-num {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 24px; height: 24px; border-radius: 50%;
+      background: var(--gold-dim); color: var(--gold-lt);
+      font-size: 0.65rem; margin-left: 5px; vertical-align: middle;
+      font-family: -apple-system, sans-serif;
+    }
+    .verse-translation { font-size: 0.83rem; color: var(--text-dim); line-height: 1.65; }
+
+    .reader-loading {
+      flex: 1; display: flex;
+      align-items: center; justify-content: center;
+      flex-direction: column; gap: 14px;
+      color: var(--text-dim); font-size: 0.88rem;
+    }
+    .spinner {
+      width: 34px; height: 34px;
+      border: 3px solid var(--gold-dim);
+      border-top-color: var(--gold);
+      border-radius: 50%;
+      animation: spin 0.75s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .reader-error {
+      flex: 1; display: flex;
+      align-items: center; justify-content: center;
+      flex-direction: column; gap: 12px;
+      color: var(--text-dim); font-size: 0.88rem; text-align: center; padding: 30px;
+    }
   </style>
 </head>
 <body>
@@ -620,6 +811,20 @@
         <path d="M3 3v5h5"/>
       </svg>
     </button>
+  </div>
+
+  <!-- SURAHS SECTION -->
+  <div class="surahs-section" id="surahs-section">
+    <div class="surahs-header">
+      <div class="surahs-title">My Surahs</div>
+      <button class="icon-btn" id="surah-edit-btn" aria-label="Edit surahs" title="Edit surahs">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+        </svg>
+      </button>
+    </div>
+    <div class="surah-grid" id="surah-grid"></div>
   </div>
 
   <!-- ── COMPLETE OVERLAY ──────────────────────────────────────────────────── -->
@@ -720,6 +925,55 @@
 
   <!-- TOAST -->
   <div class="toast" id="toast"></div>
+
+  <!-- SURAH READER OVERLAY -->
+  <div class="reader-overlay" id="reader-overlay">
+    <div class="reader-header">
+      <button class="reader-close" id="reader-close" aria-label="Close">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+        </svg>
+      </button>
+      <div class="reader-info">
+        <div class="reader-arabic" id="reader-arabic"></div>
+        <div class="reader-sub"    id="reader-sub"></div>
+      </div>
+    </div>
+    <div class="reader-body" id="reader-body">
+      <div class="reader-loading"><div class="spinner"></div><span>Loading…</span></div>
+    </div>
+  </div>
+
+  <!-- ADD SURAH MODAL -->
+  <div class="modal-bg" id="add-surah-modal">
+    <div class="modal-card">
+      <div class="modal-title">Add Surah</div>
+      <div class="modal-hint">Enter the Surah number (1 – 114)</div>
+      <input type="number" class="modal-input" id="add-surah-input"
+             placeholder="e.g. 36 (Ya-Sin)" min="1" max="114" inputmode="numeric">
+      <div class="modal-btns">
+        <button class="btn-gold"    id="add-surah-confirm-btn">Add</button>
+        <button class="btn-outline" id="add-surah-cancel-btn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB BAR -->
+  <div class="tab-bar">
+    <button class="tab-btn active" id="tab-counter">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+      </svg>
+      Counter
+    </button>
+    <button class="tab-btn" id="tab-surahs">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+      </svg>
+      Surahs
+    </button>
+  </div>
 
   <script>
     // ── DEFAULT DHIKR LIST ───────────────────────────────────────────────────
@@ -1138,6 +1392,180 @@
         localStorage.setItem('tasbih_install_hint', 'dismissed');
       });
     })();
+
+    // ── SURAH FEATURE ────────────────────────────────────────────────────────
+    const DEFAULT_SURAHS = [
+      { num: 1,   arabic: 'الفاتحة', name: 'Al-Fatiha', verses: 7,  type: 'Meccan' },
+      { num: 112, arabic: 'الإخلاص', name: 'Al-Ikhlas', verses: 4,  type: 'Meccan' },
+      { num: 113, arabic: 'الفلق',   name: 'Al-Falaq',  verses: 5,  type: 'Meccan' },
+      { num: 114, arabic: 'الناس',   name: 'An-Nas',    verses: 6,  type: 'Meccan' },
+    ];
+
+    let surahList          = JSON.parse(localStorage.getItem('tasbih_surahs') || 'null') || DEFAULT_SURAHS.map(s => ({...s}));
+    let surahEditMode      = false;
+    let currentReaderSurah = null;
+
+    function saveSurahList() {
+      localStorage.setItem('tasbih_surahs', JSON.stringify(surahList));
+    }
+
+    function buildSurahGrid() {
+      const $grid = document.getElementById('surah-grid');
+      $grid.innerHTML = '';
+      $grid.classList.toggle('edit-mode', surahEditMode);
+
+      surahList.forEach((s, i) => {
+        const card = document.createElement('div');
+        card.className = 'surah-card';
+        card.innerHTML =
+          `<div class="surah-num">Surah ${s.num}</div>` +
+          `<div class="surah-arabic">${s.arabic}</div>` +
+          `<div class="surah-name">${s.name}</div>` +
+          `<div class="surah-meta">${s.verses} verses &middot; ${s.type}</div>` +
+          `<button class="card-del" aria-label="Remove">&times;</button>`;
+        if (!surahEditMode) {
+          card.addEventListener('click', () => openReader(s));
+        }
+        card.querySelector('.card-del').addEventListener('click', e => {
+          e.stopPropagation();
+          deleteSurah(i);
+        });
+        $grid.appendChild(card);
+      });
+
+      const addCard = document.createElement('div');
+      addCard.className = 'surah-card surah-card-add';
+      addCard.setAttribute('role', 'button');
+      addCard.setAttribute('aria-label', 'Add Surah');
+      addCard.textContent = '+';
+      addCard.addEventListener('click', openAddSurahModal);
+      $grid.appendChild(addCard);
+
+      document.getElementById('surah-edit-btn').classList.toggle('active-mode', surahEditMode);
+    }
+
+    function deleteSurah(i) {
+      const name = surahList[i].name;
+      surahList.splice(i, 1);
+      saveSurahList();
+      buildSurahGrid();
+      showToast(`"${name}" removed`);
+    }
+
+    // Tab switching
+    const $counterArea   = document.querySelector('.counter-area');
+    const $chipRowEl     = document.querySelector('.chip-row');
+    const $controlsEl    = document.querySelector('.controls');
+    const $surahsSection = document.getElementById('surahs-section');
+    const $tabCounter    = document.getElementById('tab-counter');
+    const $tabSurahs     = document.getElementById('tab-surahs');
+
+    function switchTab(tab) {
+      if (tab === 'counter') {
+        $counterArea.style.display  = '';
+        $chipRowEl.style.display    = '';
+        $controlsEl.style.display   = '';
+        $surahsSection.classList.remove('show');
+        $tabCounter.classList.add('active');
+        $tabSurahs.classList.remove('active');
+      } else {
+        $counterArea.style.display  = 'none';
+        $chipRowEl.style.display    = 'none';
+        $controlsEl.style.display   = 'none';
+        $surahsSection.classList.add('show');
+        $tabCounter.classList.remove('active');
+        $tabSurahs.classList.add('active');
+        buildSurahGrid();
+      }
+    }
+
+    $tabCounter.addEventListener('click', () => switchTab('counter'));
+    $tabSurahs.addEventListener('click',  () => switchTab('surahs'));
+
+    document.getElementById('surah-edit-btn').addEventListener('click', () => {
+      surahEditMode = !surahEditMode;
+      buildSurahGrid();
+    });
+
+    // Add Surah modal
+    function openAddSurahModal() {
+      document.getElementById('add-surah-input').value = '';
+      document.getElementById('add-surah-modal').classList.add('show');
+      setTimeout(() => document.getElementById('add-surah-input').focus(), 120);
+    }
+
+    document.getElementById('add-surah-cancel-btn').addEventListener('click', () =>
+      document.getElementById('add-surah-modal').classList.remove('show'));
+
+    document.getElementById('add-surah-modal').addEventListener('click', e => {
+      if (e.target === document.getElementById('add-surah-modal'))
+        document.getElementById('add-surah-modal').classList.remove('show');
+    });
+
+    document.getElementById('add-surah-confirm-btn').addEventListener('click', async () => {
+      const num = parseInt(document.getElementById('add-surah-input').value, 10);
+      if (!num || num < 1 || num > 114) { showToast('Enter a number 1–114'); return; }
+      if (surahList.find(s => s.num === num)) { showToast('Already added'); return; }
+      document.getElementById('add-surah-modal').classList.remove('show');
+      showToast('Fetching surah info…');
+      try {
+        const res  = await fetch(`https://api.alquran.cloud/v1/surah/${num}`);
+        const data = await res.json();
+        if (data.code !== 200) throw new Error();
+        const s = data.data;
+        surahList.push({ num: s.number, arabic: s.name, name: s.englishName,
+                         verses: s.numberOfAyahs, type: s.revelationType });
+        saveSurahList();
+        buildSurahGrid();
+        showToast(`${s.englishName} added ✓`);
+      } catch (_) {
+        showToast('Could not fetch — check connection');
+      }
+    });
+
+    // Reader
+    async function openReader(surah) {
+      currentReaderSurah = surah;
+      const $rov   = document.getElementById('reader-overlay');
+      const $rAr   = document.getElementById('reader-arabic');
+      const $rSub  = document.getElementById('reader-sub');
+      const $rBody = document.getElementById('reader-body');
+
+      $rAr.textContent  = surah.arabic;
+      $rSub.textContent = `${surah.name} · ${surah.verses} verses`;
+      $rBody.innerHTML  = '<div class="reader-loading"><div class="spinner"></div><span>Loading…</span></div>';
+      $rov.classList.add('show');
+
+      try {
+        const res  = await fetch(`https://api.alquran.cloud/v1/surah/${surah.num}/editions/quran-uthmani,en.asad`);
+        const data = await res.json();
+        if (data.code !== 200) throw new Error();
+        const [ar, en] = data.data;
+        let html = '';
+        if (surah.num !== 1 && surah.num !== 9) {
+          html += '<div class="reader-bismillah">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>';
+        }
+        ar.ayahs.forEach((ayah, idx) => {
+          html +=
+            '<div class="verse-block">' +
+            `<div class="verse-arabic"><span class="verse-num">${ayah.numberInSurah}</span> ${ayah.text}</div>` +
+            `<div class="verse-translation">${en.ayahs[idx] ? en.ayahs[idx].text : ''}</div>` +
+            '</div>';
+        });
+        $rBody.innerHTML = html;
+      } catch (_) {
+        $rBody.innerHTML =
+          '<div class="reader-error">' +
+          '<div>⚠️ Failed to load</div>' +
+          '<div>Check your internet connection.</div>' +
+          '<button class="btn-outline" id="retry-btn" style="margin-top:12px">Retry</button>' +
+          '</div>';
+        document.getElementById('retry-btn').addEventListener('click', () => openReader(currentReaderSurah));
+      }
+    }
+
+    document.getElementById('reader-close').addEventListener('click', () =>
+      document.getElementById('reader-overlay').classList.remove('show'));
 
     // ── BOOT ─────────────────────────────────────────────────────────────────
     buildChips();
