@@ -883,6 +883,7 @@
       color: #162010;
     }
     .speed-btn:active { opacity: 0.75; }
+    .loop-btn { font-size: 0.9rem; line-height: 1; padding: 3px 7px; }
 
     /* ── PDF PAGES ──────────────────────────────────────── */
     .pdf-pages {
@@ -1145,6 +1146,7 @@
       </div>
       <div class="audio-time" id="audio-time">0:00</div>
       <div class="audio-speeds">
+        <button class="speed-btn loop-btn" id="audio-loop" aria-label="Repeat recitation" title="Repeat">↻</button>
         <button class="speed-btn active" data-speed="1">1×</button>
         <button class="speed-btn" data-speed="1.5">1.5×</button>
         <button class="speed-btn" data-speed="2">2×</button>
@@ -2029,11 +2031,11 @@
     });
 
     // Speed buttons
-    document.querySelectorAll('.speed-btn').forEach(btn => {
+    document.querySelectorAll('.speed-btn[data-speed]').forEach(btn => {
       btn.addEventListener('click', () => {
         const speed = parseFloat(btn.dataset.speed);
         $audioEl.playbackRate = speed;
-        document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.speed-btn[data-speed]').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         haptic(14);
       });
@@ -2045,12 +2047,23 @@
       }
     });
 
+    // Repeat / loop
+    const $audioLoop = document.getElementById('audio-loop');
+    $audioLoop.addEventListener('click', () => {
+      $audioEl.loop = !$audioEl.loop;
+      $audioLoop.classList.toggle('active', $audioEl.loop);
+      haptic(14);
+      showToast($audioEl.loop ? 'Repeat on 🔁' : 'Repeat off');
+    });
+
     function stopAudio() {
       $audioEl.pause();
       $audioEl.currentTime = 0;
       $audioEl.playbackRate = 1;
+      $audioEl.loop = false;
+      $audioLoop.classList.remove('active');
       showPlayIcon(false);
-      document.querySelectorAll('.speed-btn').forEach(b =>
+      document.querySelectorAll('.speed-btn[data-speed]').forEach(b =>
         b.classList.toggle('active', b.dataset.speed === '1'));
     }
 
