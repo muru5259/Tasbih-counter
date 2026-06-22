@@ -2,6 +2,15 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <!-- Apply the saved theme before first paint to avoid a flash -->
+  <script>
+    (function () {
+      try {
+        document.documentElement.setAttribute(
+          'data-theme', localStorage.getItem('tasbih_theme') || 'dark');
+      } catch (e) {}
+    })();
+  </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -55,6 +64,20 @@
       --green-mid: #2d6a4f;
       --done:      #52b788;
       --danger:    #ff6b6b;
+    }
+
+    /* Light theme — warm cream + deep gold, keeping the green/gold identity */
+    [data-theme="light"] {
+      --bg:        #f3ecdc;
+      --surface:   #fffaf0;
+      --gold:      #9c7a16;
+      --gold-lt:   #7a5e10;
+      --gold-dim:  rgba(156, 122, 22, 0.28);
+      --text:      #1d2e23;
+      --text-dim:  rgba(29, 46, 35, 0.55);
+      --green-mid: #2d6a4f;
+      --done:      #2e8b57;
+      --danger:    #cc4b4b;
     }
 
     html, body { height: 100%; overflow: hidden; }
@@ -193,6 +216,37 @@
     }
     .chip.chip-done:active { opacity: 0.8; }
 
+    /* ── STATS BAR (streak · today · lifetime) ──────────── */
+    .stats-bar {
+      width: 100%;
+      max-width: 480px;
+      padding: 0 16px 12px;
+      display: flex;
+      gap: 8px;
+    }
+    .stat-cell {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--gold-dim);
+      border-radius: 12px;
+      padding: 8px 6px;
+      display: flex; flex-direction: column;
+      align-items: center; gap: 2px;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: background 0.15s, transform 0.1s;
+    }
+    .stat-cell:active { background: rgba(201,162,39,0.1); transform: scale(0.96); }
+    .stat-val {
+      font-size: 1.05rem; font-weight: 700; color: var(--gold);
+      font-variant-numeric: tabular-nums; line-height: 1.1;
+    }
+    .stat-val .stat-flame { font-size: 0.9rem; }
+    .stat-label {
+      font-size: 0.55rem; color: var(--text-dim);
+      text-transform: uppercase; letter-spacing: 1px;
+    }
+
     /* ── COUNTER AREA ───────────────────────────────────── */
     .counter-area {
       flex: 1;
@@ -267,14 +321,14 @@
     .count-num {
       font-size: 4.8rem;
       font-weight: 700;
-      color: var(--text);
+      color: #f5f0e0;   /* fixed light — always sits on the dark orb */
       line-height: 1;
       font-variant-numeric: tabular-nums;
       transition: transform 0.08s ease;
     }
     .count-num.bump { transform: scale(1.12); }
 
-    .tap-hint { font-size: 0.62rem; color: var(--text-dim); letter-spacing: 3px; text-transform: uppercase; }
+    .tap-hint { font-size: 0.62rem; color: rgba(245,240,224,0.5); letter-spacing: 3px; text-transform: uppercase; }
 
     .target-text { font-size: 0.82rem; color: var(--text-dim); min-height: 1.1rem; }
     .target-text .done-label { color: var(--done); }
@@ -852,6 +906,7 @@
       color: #162010;
     }
     .speed-btn:active { opacity: 0.75; }
+    .loop-btn { font-size: 0.9rem; line-height: 1; padding: 3px 7px; }
 
     /* ── PDF PAGES ──────────────────────────────────────── */
     .pdf-pages {
@@ -883,12 +938,30 @@
           <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
         </svg>
       </button>
+      <button class="icon-btn" id="theme-btn" aria-label="Toggle light/dark theme" title="Theme">☀️</button>
+      <button class="icon-btn" id="sound-btn" aria-label="Toggle tap sound" title="Tap sound">🔇</button>
       <button class="icon-btn" id="settings-btn" aria-label="Custom target">⚙️</button>
     </div>
   </div>
 
   <!-- DHIKR CHIPS -->
   <div class="chip-row" id="chip-row"></div>
+
+  <!-- STATS BAR -->
+  <div class="stats-bar" id="stats-bar">
+    <div class="stat-cell" id="stat-streak">
+      <div class="stat-val"><span class="stat-flame">🔥</span> <span id="stat-streak-val">0</span></div>
+      <div class="stat-label">Day streak</div>
+    </div>
+    <div class="stat-cell" id="stat-today">
+      <div class="stat-val" id="stat-today-val">0/0</div>
+      <div class="stat-label">Today</div>
+    </div>
+    <div class="stat-cell" id="stat-lifetime">
+      <div class="stat-val" id="stat-lifetime-val">0</div>
+      <div class="stat-label">Lifetime</div>
+    </div>
+  </div>
 
   <!-- COUNTER AREA -->
   <div class="counter-area">
@@ -976,6 +1049,20 @@
       <div class="modal-btns">
         <button class="btn-gold"    id="modal-set-btn">Set</button>
         <button class="btn-outline" id="modal-cancel-btn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── DAILY GOAL MODAL ──────────────────────────────────────────────────── -->
+  <div class="modal-bg" id="goal-modal">
+    <div class="modal-card">
+      <div class="modal-title">Daily Goal 🔥</div>
+      <div class="modal-hint">Hit this many counts in a day to keep your streak alive</div>
+      <input type="number" class="modal-input" id="goal-input"
+             placeholder="e.g. 1000" min="1" max="100000" inputmode="numeric">
+      <div class="modal-btns">
+        <button class="btn-gold"    id="goal-set-btn">Set</button>
+        <button class="btn-outline" id="goal-cancel-btn">Cancel</button>
       </div>
     </div>
   </div>
@@ -1083,6 +1170,7 @@
       </div>
       <div class="audio-time" id="audio-time">0:00</div>
       <div class="audio-speeds">
+        <button class="speed-btn loop-btn" id="audio-loop" aria-label="Repeat recitation" title="Repeat">↻</button>
         <button class="speed-btn active" data-speed="1">1×</button>
         <button class="speed-btn" data-speed="1.5">1.5×</button>
         <button class="speed-btn" data-speed="2">2×</button>
@@ -1345,6 +1433,91 @@
       showToast(`"${name}" deleted`);
     }
 
+    // ── DAILY STATS (streak · today · lifetime) ──────────────────────────────
+    const STATS_KEY = 'tasbih_stats_v1';
+
+    function todayStr() {
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+    function dayDiff(from, to) {
+      const a = new Date(from + 'T00:00:00');
+      const b = new Date(to   + 'T00:00:00');
+      return Math.round((b - a) / 86400000);
+    }
+
+    let stats = JSON.parse(localStorage.getItem(STATS_KEY) || 'null') || {
+      date: todayStr(), todayCount: 0, goal: 1000,
+      streak: 0, bestStreak: 0, lastGoalDate: null, lifetime: 0
+    };
+
+    function saveStats() { localStorage.setItem(STATS_KEY, JSON.stringify(stats)); }
+
+    // Roll the counters over to a new day and break the streak if a day was missed.
+    function rolloverStats() {
+      const t = todayStr();
+      if (stats.date !== t) { stats.date = t; stats.todayCount = 0; }
+      if (stats.lastGoalDate && dayDiff(stats.lastGoalDate, t) > 1) stats.streak = 0;
+      saveStats();
+    }
+
+    // Count one tap toward today's progress and the lifetime total.
+    function recordTap() {
+      rolloverStats();
+      stats.todayCount++;
+      stats.lifetime++;
+
+      // First time the daily goal is reached today → extend (or restart) the streak.
+      if (stats.todayCount >= stats.goal && stats.lastGoalDate !== stats.date) {
+        stats.streak = (stats.lastGoalDate && dayDiff(stats.lastGoalDate, stats.date) === 1)
+          ? stats.streak + 1 : 1;
+        stats.lastGoalDate = stats.date;
+        if (stats.streak > stats.bestStreak) stats.bestStreak = stats.streak;
+        haptic([40, 30, 40]);
+        showToast(`🔥 Daily goal reached! ${stats.streak} day streak`);
+      }
+      saveStats();
+      renderStats();
+    }
+
+    function undoTap() {
+      if (stats.todayCount > 0) stats.todayCount--;
+      if (stats.lifetime   > 0) stats.lifetime--;
+      saveStats();
+      renderStats();
+    }
+
+    function renderStats() {
+      document.getElementById('stat-streak-val').textContent   = stats.streak;
+      document.getElementById('stat-today-val').textContent    = `${stats.todayCount}/${stats.goal}`;
+      document.getElementById('stat-lifetime-val').textContent = stats.lifetime.toLocaleString();
+    }
+
+    // Daily goal modal
+    const $goalModal = document.getElementById('goal-modal');
+    function openGoalModal() {
+      document.getElementById('goal-input').value = stats.goal;
+      $goalModal.classList.add('show');
+      setTimeout(() => document.getElementById('goal-input').focus(), 120);
+    }
+    document.getElementById('stat-streak').addEventListener('click', openGoalModal);
+    document.getElementById('stat-today').addEventListener('click', openGoalModal);
+    document.getElementById('stat-lifetime').addEventListener('click', () =>
+      showToast(`🏆 Best streak: ${stats.bestStreak} ${stats.bestStreak === 1 ? 'day' : 'days'}`));
+
+    document.getElementById('goal-cancel-btn').addEventListener('click', () =>
+      $goalModal.classList.remove('show'));
+    $goalModal.addEventListener('click', e => { if (e.target === $goalModal) $goalModal.classList.remove('show'); });
+    document.getElementById('goal-set-btn').addEventListener('click', () => {
+      const val = parseInt(document.getElementById('goal-input').value, 10);
+      if (!val || val < 1 || val > 100000) { showToast('Enter a goal between 1 and 100,000'); return; }
+      stats.goal = val;
+      saveStats();
+      renderStats();
+      $goalModal.classList.remove('show');
+      showToast(`Daily goal set to ${val.toLocaleString()} 🎯`);
+    });
+
     // ── RENDER ───────────────────────────────────────────────────────────────
     function render() {
       const d = curDhikr();
@@ -1365,6 +1538,8 @@
     function handleTap() {
       count++;
       haptic(28);
+      playClick();
+      recordTap();
 
       $tapBtn.classList.add('press');
       $countNum.classList.add('bump');
@@ -1394,6 +1569,65 @@
       if ('vibrate' in navigator) { try { navigator.vibrate(pattern); } catch (_) {} }
     }
 
+    // ── TAP SOUND (synthesized bead click — no audio file needed) ─────────────
+    const SOUND_KEY = 'tasbih_sound';
+    let soundOn = localStorage.getItem(SOUND_KEY) === 'on';
+    let audioCtx = null;
+
+    function playClick() {
+      if (!soundOn) return;
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const now  = audioCtx.currentTime;
+        const osc  = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(1100, now);
+        osc.frequency.exponentialRampToValueAtTime(440, now + 0.05);
+        gain.gain.setValueAtTime(0.0001, now);
+        gain.gain.exponentialRampToValueAtTime(0.32, now + 0.004);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.085);
+        osc.connect(gain).connect(audioCtx.destination);
+        osc.start(now);
+        osc.stop(now + 0.1);
+      } catch (_) {}
+    }
+
+    const $soundBtn = document.getElementById('sound-btn');
+    function renderSoundBtn() {
+      $soundBtn.textContent = soundOn ? '🔊' : '🔇';
+      $soundBtn.classList.toggle('active-mode', soundOn);
+    }
+    $soundBtn.addEventListener('click', () => {
+      soundOn = !soundOn;
+      localStorage.setItem(SOUND_KEY, soundOn ? 'on' : 'off');
+      renderSoundBtn();
+      if (soundOn) playClick();   // preview + unlocks the audio context on this gesture
+      showToast(soundOn ? 'Tap sound on 🔊' : 'Tap sound off 🔇');
+    });
+    renderSoundBtn();
+
+    // ── THEME (dark / light) ─────────────────────────────────────────────────
+    const THEME_KEY = 'tasbih_theme';
+    const $themeBtn = document.getElementById('theme-btn');
+    let theme = localStorage.getItem(THEME_KEY) || 'dark';
+
+    function applyTheme(t) {
+      document.documentElement.setAttribute('data-theme', t);
+      $themeBtn.textContent = t === 'light' ? '🌙' : '☀️';   // shows the mode you'll switch to
+      const meta = document.querySelector('meta[name="theme-color"]');
+      if (meta) meta.setAttribute('content', t === 'light' ? '#f3ecdc' : '#0d2318');
+    }
+    applyTheme(theme);
+
+    $themeBtn.addEventListener('click', () => {
+      theme = theme === 'light' ? 'dark' : 'light';
+      localStorage.setItem(THEME_KEY, theme);
+      applyTheme(theme);
+      haptic(14);
+    });
+
     // ── UNDO ─────────────────────────────────────────────────────────────────
     document.getElementById('undo-btn').addEventListener('click', () => {
       if (count <= 0) return;
@@ -1402,6 +1636,7 @@
       $overlay.classList.remove('show');
       $ringFill.classList.remove('done-pulse');
       haptic(14);
+      undoTap();
       render();
     });
 
@@ -1602,6 +1837,7 @@
     // Tab switching
     const $counterArea   = document.querySelector('.counter-area');
     const $chipRowEl     = document.querySelector('.chip-row');
+    const $statsBarEl    = document.getElementById('stats-bar');
     const $controlsEl    = document.querySelector('.controls');
     const $surahsSection = document.getElementById('surahs-section');
     const $tabCounter    = document.getElementById('tab-counter');
@@ -1611,6 +1847,7 @@
       if (tab === 'counter') {
         $counterArea.style.display  = '';
         $chipRowEl.style.display    = '';
+        $statsBarEl.style.display   = '';
         $controlsEl.style.display   = '';
         $surahsSection.classList.remove('show');
         $tabCounter.classList.add('active');
@@ -1618,6 +1855,7 @@
       } else {
         $counterArea.style.display  = 'none';
         $chipRowEl.style.display    = 'none';
+        $statsBarEl.style.display   = 'none';
         $controlsEl.style.display   = 'none';
         $surahsSection.classList.add('show');
         $tabCounter.classList.remove('active');
@@ -1837,11 +2075,11 @@
     });
 
     // Speed buttons
-    document.querySelectorAll('.speed-btn').forEach(btn => {
+    document.querySelectorAll('.speed-btn[data-speed]').forEach(btn => {
       btn.addEventListener('click', () => {
         const speed = parseFloat(btn.dataset.speed);
         $audioEl.playbackRate = speed;
-        document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.speed-btn[data-speed]').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         haptic(14);
       });
@@ -1853,12 +2091,23 @@
       }
     });
 
+    // Repeat / loop
+    const $audioLoop = document.getElementById('audio-loop');
+    $audioLoop.addEventListener('click', () => {
+      $audioEl.loop = !$audioEl.loop;
+      $audioLoop.classList.toggle('active', $audioEl.loop);
+      haptic(14);
+      showToast($audioEl.loop ? 'Repeat on 🔁' : 'Repeat off');
+    });
+
     function stopAudio() {
       $audioEl.pause();
       $audioEl.currentTime = 0;
       $audioEl.playbackRate = 1;
+      $audioEl.loop = false;
+      $audioLoop.classList.remove('active');
       showPlayIcon(false);
-      document.querySelectorAll('.speed-btn').forEach(b =>
+      document.querySelectorAll('.speed-btn[data-speed]').forEach(b =>
         b.classList.toggle('active', b.dataset.speed === '1'));
     }
 
@@ -1920,6 +2169,8 @@
 
     // ── BOOT ─────────────────────────────────────────────────────────────────
     buildChips();
+    rolloverStats();
+    renderStats();
     render();
   </script>
 </body>
