@@ -144,6 +144,22 @@
       border-color: var(--gold);
     }
 
+    /* ── HIJRI DATE STRIP ───────────────────────────────── */
+    .date-strip {
+      width: 100%;
+      max-width: 480px;
+      padding: 0 24px 10px;
+      text-align: center;
+    }
+    .date-hijri {
+      font-size: 0.92rem; font-weight: 600;
+      color: var(--gold); letter-spacing: 0.3px;
+    }
+    .date-greg {
+      font-size: 0.64rem; color: var(--text-dim);
+      margin-top: 1px; letter-spacing: 0.5px;
+    }
+
     /* ── DHIKR CHIPS ────────────────────────────────────── */
     .chip-row {
       width: 100%;
@@ -950,6 +966,12 @@
       <button class="icon-btn" id="sound-btn" aria-label="Toggle tap sound" title="Tap sound">🔇</button>
       <button class="icon-btn" id="settings-btn" aria-label="Custom target">⚙️</button>
     </div>
+  </div>
+
+  <!-- HIJRI DATE STRIP -->
+  <div class="date-strip" id="date-strip">
+    <div class="date-hijri" id="date-hijri">🌙 —</div>
+    <div class="date-greg"  id="date-greg">—</div>
   </div>
 
   <!-- DHIKR CHIPS -->
@@ -1845,6 +1867,7 @@
     // Tab switching
     const $counterArea   = document.querySelector('.counter-area');
     const $chipRowEl     = document.querySelector('.chip-row');
+    const $dateStripEl   = document.getElementById('date-strip');
     const $statsBarEl    = document.getElementById('stats-bar');
     const $controlsEl    = document.querySelector('.controls');
     const $surahsSection = document.getElementById('surahs-section');
@@ -1855,14 +1878,17 @@
       if (tab === 'counter') {
         $counterArea.style.display  = '';
         $chipRowEl.style.display    = '';
+        $dateStripEl.style.display  = '';
         $statsBarEl.style.display   = '';
         $controlsEl.style.display   = '';
         $surahsSection.classList.remove('show');
         $tabCounter.classList.add('active');
         $tabSurahs.classList.remove('active');
+        renderHijriDate();   // keep fresh if the app was left open past midnight
       } else {
         $counterArea.style.display  = 'none';
         $chipRowEl.style.display    = 'none';
+        $dateStripEl.style.display  = 'none';
         $statsBarEl.style.display   = 'none';
         $controlsEl.style.display   = 'none';
         $surahsSection.classList.add('show');
@@ -2175,10 +2201,28 @@
       });
     }
 
+    // ── HIJRI DATE (Umm al-Qura, computed offline via Intl) ──────────────────
+    function renderHijriDate() {
+      const now = new Date();
+      let hijri = '';
+      try {
+        const parts = new Intl.DateTimeFormat('en-US-u-ca-islamic-umalqura', {
+          day: 'numeric', month: 'long', year: 'numeric'
+        }).formatToParts(now);
+        const get = t => (parts.find(p => p.type === t) || {}).value || '';
+        hijri = `${get('day')} ${get('month')} ${get('year')} AH`;
+      } catch (_) {}
+      document.getElementById('date-hijri').textContent = hijri ? `🌙 ${hijri}` : '';
+      document.getElementById('date-greg').textContent = new Intl.DateTimeFormat(undefined, {
+        weekday: 'long', day: 'numeric', month: 'short', year: 'numeric'
+      }).format(now);
+    }
+
     // ── BOOT ─────────────────────────────────────────────────────────────────
     buildChips();
     rolloverStats();
     renderStats();
+    renderHijriDate();
     render();
   </script>
 </body>
