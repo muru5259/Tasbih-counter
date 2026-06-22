@@ -833,7 +833,9 @@
       display: none;
       flex-direction: column;
       gap: 9px;
-      padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+      /* Lift the bar (and its seek slider) clear of the iOS home-indicator
+         swipe zone so the scrubber stays draggable. */
+      padding: 10px 16px calc(32px + env(safe-area-inset-bottom));
       background: var(--surface);
       border-top: 1px solid var(--gold-dim);
       flex-shrink: 0;
