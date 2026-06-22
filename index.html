@@ -193,6 +193,37 @@
     }
     .chip.chip-done:active { opacity: 0.8; }
 
+    /* ── STATS BAR (streak · today · lifetime) ──────────── */
+    .stats-bar {
+      width: 100%;
+      max-width: 480px;
+      padding: 0 16px 12px;
+      display: flex;
+      gap: 8px;
+    }
+    .stat-cell {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--gold-dim);
+      border-radius: 12px;
+      padding: 8px 6px;
+      display: flex; flex-direction: column;
+      align-items: center; gap: 2px;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: background 0.15s, transform 0.1s;
+    }
+    .stat-cell:active { background: rgba(201,162,39,0.1); transform: scale(0.96); }
+    .stat-val {
+      font-size: 1.05rem; font-weight: 700; color: var(--gold);
+      font-variant-numeric: tabular-nums; line-height: 1.1;
+    }
+    .stat-val .stat-flame { font-size: 0.9rem; }
+    .stat-label {
+      font-size: 0.55rem; color: var(--text-dim);
+      text-transform: uppercase; letter-spacing: 1px;
+    }
+
     /* ── COUNTER AREA ───────────────────────────────────── */
     .counter-area {
       flex: 1;
@@ -890,6 +921,22 @@
   <!-- DHIKR CHIPS -->
   <div class="chip-row" id="chip-row"></div>
 
+  <!-- STATS BAR -->
+  <div class="stats-bar" id="stats-bar">
+    <div class="stat-cell" id="stat-streak">
+      <div class="stat-val"><span class="stat-flame">🔥</span> <span id="stat-streak-val">0</span></div>
+      <div class="stat-label">Day streak</div>
+    </div>
+    <div class="stat-cell" id="stat-today">
+      <div class="stat-val" id="stat-today-val">0/0</div>
+      <div class="stat-label">Today</div>
+    </div>
+    <div class="stat-cell" id="stat-lifetime">
+      <div class="stat-val" id="stat-lifetime-val">0</div>
+      <div class="stat-label">Lifetime</div>
+    </div>
+  </div>
+
   <!-- COUNTER AREA -->
   <div class="counter-area">
     <div class="arabic-text" id="arabic-text"></div>
@@ -976,6 +1023,20 @@
       <div class="modal-btns">
         <button class="btn-gold"    id="modal-set-btn">Set</button>
         <button class="btn-outline" id="modal-cancel-btn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── DAILY GOAL MODAL ──────────────────────────────────────────────────── -->
+  <div class="modal-bg" id="goal-modal">
+    <div class="modal-card">
+      <div class="modal-title">Daily Goal 🔥</div>
+      <div class="modal-hint">Hit this many counts in a day to keep your streak alive</div>
+      <input type="number" class="modal-input" id="goal-input"
+             placeholder="e.g. 1000" min="1" max="100000" inputmode="numeric">
+      <div class="modal-btns">
+        <button class="btn-gold"    id="goal-set-btn">Set</button>
+        <button class="btn-outline" id="goal-cancel-btn">Cancel</button>
       </div>
     </div>
   </div>
@@ -1345,6 +1406,91 @@
       showToast(`"${name}" deleted`);
     }
 
+    // ── DAILY STATS (streak · today · lifetime) ──────────────────────────────
+    const STATS_KEY = 'tasbih_stats_v1';
+
+    function todayStr() {
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+    function dayDiff(from, to) {
+      const a = new Date(from + 'T00:00:00');
+      const b = new Date(to   + 'T00:00:00');
+      return Math.round((b - a) / 86400000);
+    }
+
+    let stats = JSON.parse(localStorage.getItem(STATS_KEY) || 'null') || {
+      date: todayStr(), todayCount: 0, goal: 1000,
+      streak: 0, bestStreak: 0, lastGoalDate: null, lifetime: 0
+    };
+
+    function saveStats() { localStorage.setItem(STATS_KEY, JSON.stringify(stats)); }
+
+    // Roll the counters over to a new day and break the streak if a day was missed.
+    function rolloverStats() {
+      const t = todayStr();
+      if (stats.date !== t) { stats.date = t; stats.todayCount = 0; }
+      if (stats.lastGoalDate && dayDiff(stats.lastGoalDate, t) > 1) stats.streak = 0;
+      saveStats();
+    }
+
+    // Count one tap toward today's progress and the lifetime total.
+    function recordTap() {
+      rolloverStats();
+      stats.todayCount++;
+      stats.lifetime++;
+
+      // First time the daily goal is reached today → extend (or restart) the streak.
+      if (stats.todayCount >= stats.goal && stats.lastGoalDate !== stats.date) {
+        stats.streak = (stats.lastGoalDate && dayDiff(stats.lastGoalDate, stats.date) === 1)
+          ? stats.streak + 1 : 1;
+        stats.lastGoalDate = stats.date;
+        if (stats.streak > stats.bestStreak) stats.bestStreak = stats.streak;
+        haptic([40, 30, 40]);
+        showToast(`🔥 Daily goal reached! ${stats.streak} day streak`);
+      }
+      saveStats();
+      renderStats();
+    }
+
+    function undoTap() {
+      if (stats.todayCount > 0) stats.todayCount--;
+      if (stats.lifetime   > 0) stats.lifetime--;
+      saveStats();
+      renderStats();
+    }
+
+    function renderStats() {
+      document.getElementById('stat-streak-val').textContent   = stats.streak;
+      document.getElementById('stat-today-val').textContent    = `${stats.todayCount}/${stats.goal}`;
+      document.getElementById('stat-lifetime-val').textContent = stats.lifetime.toLocaleString();
+    }
+
+    // Daily goal modal
+    const $goalModal = document.getElementById('goal-modal');
+    function openGoalModal() {
+      document.getElementById('goal-input').value = stats.goal;
+      $goalModal.classList.add('show');
+      setTimeout(() => document.getElementById('goal-input').focus(), 120);
+    }
+    document.getElementById('stat-streak').addEventListener('click', openGoalModal);
+    document.getElementById('stat-today').addEventListener('click', openGoalModal);
+    document.getElementById('stat-lifetime').addEventListener('click', () =>
+      showToast(`🏆 Best streak: ${stats.bestStreak} ${stats.bestStreak === 1 ? 'day' : 'days'}`));
+
+    document.getElementById('goal-cancel-btn').addEventListener('click', () =>
+      $goalModal.classList.remove('show'));
+    $goalModal.addEventListener('click', e => { if (e.target === $goalModal) $goalModal.classList.remove('show'); });
+    document.getElementById('goal-set-btn').addEventListener('click', () => {
+      const val = parseInt(document.getElementById('goal-input').value, 10);
+      if (!val || val < 1 || val > 100000) { showToast('Enter a goal between 1 and 100,000'); return; }
+      stats.goal = val;
+      saveStats();
+      renderStats();
+      $goalModal.classList.remove('show');
+      showToast(`Daily goal set to ${val.toLocaleString()} 🎯`);
+    });
+
     // ── RENDER ───────────────────────────────────────────────────────────────
     function render() {
       const d = curDhikr();
@@ -1365,6 +1511,7 @@
     function handleTap() {
       count++;
       haptic(28);
+      recordTap();
 
       $tapBtn.classList.add('press');
       $countNum.classList.add('bump');
@@ -1402,6 +1549,7 @@
       $overlay.classList.remove('show');
       $ringFill.classList.remove('done-pulse');
       haptic(14);
+      undoTap();
       render();
     });
 
@@ -1602,6 +1750,7 @@
     // Tab switching
     const $counterArea   = document.querySelector('.counter-area');
     const $chipRowEl     = document.querySelector('.chip-row');
+    const $statsBarEl    = document.getElementById('stats-bar');
     const $controlsEl    = document.querySelector('.controls');
     const $surahsSection = document.getElementById('surahs-section');
     const $tabCounter    = document.getElementById('tab-counter');
@@ -1611,6 +1760,7 @@
       if (tab === 'counter') {
         $counterArea.style.display  = '';
         $chipRowEl.style.display    = '';
+        $statsBarEl.style.display   = '';
         $controlsEl.style.display   = '';
         $surahsSection.classList.remove('show');
         $tabCounter.classList.add('active');
@@ -1618,6 +1768,7 @@
       } else {
         $counterArea.style.display  = 'none';
         $chipRowEl.style.display    = 'none';
+        $statsBarEl.style.display   = 'none';
         $controlsEl.style.display   = 'none';
         $surahsSection.classList.add('show');
         $tabCounter.classList.remove('active');
@@ -1920,6 +2071,8 @@
 
     // ── BOOT ─────────────────────────────────────────────────────────────────
     buildChips();
+    rolloverStats();
+    renderStats();
     render();
   </script>
 </body>
