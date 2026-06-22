@@ -5,7 +5,7 @@
    - other same-origin assets    → stale-while-revalidate (fast load, refresh in
      the background so updates are picked up on the next open)
    Bump CACHE_VERSION on each release to evict the old cache. */
-const CACHE_VERSION = 'tasbih-v6';
+const CACHE_VERSION = 'tasbih-v7';
 
 self.addEventListener('install', (event) => {
   // Don't auto-activate. Wait until the page tells us to (via the update
