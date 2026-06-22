@@ -831,14 +831,15 @@
     /* ── READER AUDIO PLAYER ────────────────────────────── */
     .reader-audio {
       display: none;
-      align-items: center;
-      gap: 12px;
-      padding: 10px 16px;
+      flex-direction: column;
+      gap: 9px;
+      padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
       background: var(--surface);
-      border-bottom: 1px solid var(--gold-dim);
+      border-top: 1px solid var(--gold-dim);
       flex-shrink: 0;
     }
     .reader-audio.show { display: flex; }
+    .audio-row { display: flex; align-items: center; gap: 10px; }
 
     .audio-play {
       width: 42px; height: 42px;
@@ -855,26 +856,31 @@
     .audio-play:active { transform: scale(0.9); }
     .audio-play svg { width: 20px; height: 20px; }
 
-    .audio-meta { flex: 1; min-width: 0; }
-    .audio-label { font-size: 0.68rem; color: var(--text-dim); margin-bottom: 5px; letter-spacing: 0.5px; }
+    .audio-label {
+      flex: 1; min-width: 0;
+      font-size: 0.72rem; color: var(--text-dim);
+      letter-spacing: 0.5px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
 
     .audio-seek {
       -webkit-appearance: none; appearance: none;
-      width: 100%; height: 4px;
-      border-radius: 2px;
-      background: rgba(201,162,39,0.2);
+      width: 100%; height: 6px;
+      border-radius: 3px;
+      background: rgba(201,162,39,0.22);
       outline: none;
       cursor: pointer;
     }
     .audio-seek::-webkit-slider-thumb {
       -webkit-appearance: none; appearance: none;
-      width: 14px; height: 14px;
+      width: 18px; height: 18px;
       border-radius: 50%;
       background: var(--gold);
       cursor: pointer;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.3);
     }
     .audio-seek::-moz-range-thumb {
-      width: 14px; height: 14px;
+      width: 18px; height: 18px;
       border: none; border-radius: 50%;
       background: var(--gold);
       cursor: pointer;
@@ -1159,27 +1165,27 @@
         <div class="reader-sub"    id="reader-sub"></div>
       </div>
     </div>
-    <div class="reader-audio" id="reader-audio">
-      <button class="audio-play" id="audio-play" aria-label="Play recitation">
-        <svg class="ic-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-        <svg class="ic-pause" viewBox="0 0 24 24" fill="currentColor" style="display:none"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
-      </button>
-      <div class="audio-meta">
-        <div class="audio-label">Listen to recitation</div>
-        <input type="range" class="audio-seek" id="audio-seek" min="0" max="100" value="0" step="0.1" aria-label="Seek">
-      </div>
-      <div class="audio-time" id="audio-time">0:00</div>
-      <div class="audio-speeds">
-        <button class="speed-btn loop-btn" id="audio-loop" aria-label="Repeat recitation" title="Repeat">↻</button>
-        <button class="speed-btn active" data-speed="1">1×</button>
-        <button class="speed-btn" data-speed="1.5">1.5×</button>
-        <button class="speed-btn" data-speed="2">2×</button>
-        <button class="speed-btn" data-speed="2.5">2.5×</button>
-      </div>
-      <audio id="audio-el" preload="metadata"></audio>
-    </div>
     <div class="reader-body" id="reader-body">
       <div class="reader-loading"><div class="spinner"></div><span>Loading…</span></div>
+    </div>
+    <div class="reader-audio" id="reader-audio">
+      <div class="audio-row">
+        <button class="audio-play" id="audio-play" aria-label="Play recitation">
+          <svg class="ic-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          <svg class="ic-pause" viewBox="0 0 24 24" fill="currentColor" style="display:none"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+        </button>
+        <div class="audio-label">Listen to recitation</div>
+        <div class="audio-time" id="audio-time">0:00</div>
+        <div class="audio-speeds">
+          <button class="speed-btn loop-btn" id="audio-loop" aria-label="Repeat recitation" title="Repeat">↻</button>
+          <button class="speed-btn active" data-speed="1">1×</button>
+          <button class="speed-btn" data-speed="1.5">1.5×</button>
+          <button class="speed-btn" data-speed="2">2×</button>
+          <button class="speed-btn" data-speed="2.5">2.5×</button>
+        </div>
+      </div>
+      <input type="range" class="audio-seek" id="audio-seek" min="0" max="100" value="0" step="0.1" aria-label="Seek">
+      <audio id="audio-el" preload="metadata"></audio>
     </div>
   </div>
 
