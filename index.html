@@ -7,14 +7,14 @@
     (function () {
       try {
         document.documentElement.setAttribute(
-          'data-theme', localStorage.getItem('tasbih_theme') || 'dark');
+          'data-theme', localStorage.getItem('tasbih_theme') || 'light');
       } catch (e) {}
     })();
   </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="theme-color" content="#0d2318">
+  <meta name="theme-color" content="#f3ecdc">
   <meta name="description" content="Digital Tasbih counter with haptic feedback and sharing">
   <meta name="apple-mobile-web-app-title" content="Tasbih">
   <meta name="mobile-web-app-capable" content="yes">
@@ -1611,7 +1611,7 @@
     // ── THEME (dark / light) ─────────────────────────────────────────────────
     const THEME_KEY = 'tasbih_theme';
     const $themeBtn = document.getElementById('theme-btn');
-    let theme = localStorage.getItem(THEME_KEY) || 'dark';
+    let theme = localStorage.getItem(THEME_KEY) || 'light';
 
     function applyTheme(t) {
       document.documentElement.setAttribute('data-theme', t);
