@@ -2207,18 +2207,36 @@
     // India, so shift the Hijri date forward by this many days. The Gregorian
     // date below always shows the real today.
     const HIJRI_ADJUST_DAYS = 1;
+    const HIJRI_MONTHS = [
+      'Muharram','Safar',"Rabi' al-Awwal","Rabi' al-Thani",
+      'Jumada al-Awwal','Jumada al-Thani','Rajab',"Sha'ban",
+      'Ramadan','Shawwal',"Dhu al-Qi'dah","Dhu al-Hijjah"
+    ];
     function renderHijriDate() {
       const now = new Date();
       const hijriDate = new Date(now);
       hijriDate.setDate(hijriDate.getDate() + HIJRI_ADJUST_DAYS);
-      let hijri = '';
-      try {
-        const parts = new Intl.DateTimeFormat('en-US-u-ca-islamic-umalqura', {
-          day: 'numeric', month: 'long', year: 'numeric'
-        }).formatToParts(hijriDate);
-        const get = t => (parts.find(p => p.type === t) || {}).value || '';
-        hijri = `${get('day')} ${get('month')} ${get('year')} AH`;
-      } catch (_) {}
+
+      // Use numeric month so Android can't swap in Gregorian month names.
+      // Validate year is in Hijri range to catch silent Gregorian fallbacks.
+      function tryCalendar(cal) {
+        try {
+          const parts = new Intl.DateTimeFormat(`en-US-u-ca-${cal}`, {
+            day: 'numeric', month: 'numeric', year: 'numeric'
+          }).formatToParts(hijriDate);
+          const get = t => (parts.find(p => p.type === t) || {}).value || '';
+          const day = get('day');
+          const monthIdx = parseInt(get('month'), 10) - 1;
+          const year = parseInt(get('year'), 10);
+          if (!day || monthIdx < 0 || monthIdx > 11 || year < 1400 || year > 1600) return null;
+          return `${day} ${HIJRI_MONTHS[monthIdx]} ${year} AH`;
+        } catch (_) { return null; }
+      }
+
+      const hijri = tryCalendar('islamic-umalqura') ||
+                    tryCalendar('islamic') ||
+                    tryCalendar('islamic-civil') || '';
+
       document.getElementById('date-hijri').textContent = hijri ? `🌙 ${hijri}` : '';
       document.getElementById('date-greg').textContent = new Intl.DateTimeFormat(undefined, {
         weekday: 'long', day: 'numeric', month: 'short', year: 'numeric'
