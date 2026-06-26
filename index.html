@@ -1812,14 +1812,15 @@
       { num: 36, arabic: 'يٰسٓ', name: 'Ya-Seen', verses: 83, type: 'Meccan', pdf: 'yaseen.pdf', audio: 'yaseen.mp3' },
       { num: null, label: 'Dua', arabic: 'دُعَاءُ الكَامِل', name: 'Dua Al Kamil', type: 'Supplication', pdf: 'dua-al-kamil.pdf', audio: 'dua-al-kamil.mp3' },
       { num: null, label: 'Dua', arabic: 'رِزْقی کی دعا', name: 'Rozi ni Dua', type: 'Supplication', pdf: 'rozi-ni-dua.pdf' },
+      { num: 18, arabic: 'الْكَهْف', name: 'Surat UL Kehaf', verses: 110, type: 'Meccan', pdf: 'surat-ul-kehaf.pdf', audio: 'surat-ul-kehaf.mp3' },
     ];
 
-    let surahList          = JSON.parse(localStorage.getItem('tasbih_surahs_v6') || 'null') || DEFAULT_SURAHS.map(s => ({...s}));
+    let surahList          = JSON.parse(localStorage.getItem('tasbih_surahs_v7') || 'null') || DEFAULT_SURAHS.map(s => ({...s}));
     let surahEditMode      = false;
     let currentReaderSurah = null;
 
     function saveSurahList() {
-      localStorage.setItem('tasbih_surahs_v6', JSON.stringify(surahList));
+      localStorage.setItem('tasbih_surahs_v7', JSON.stringify(surahList));
     }
 
     function buildSurahGrid() {
